@@ -1,0 +1,36 @@
+# Ignore node modules
+node_modules/
+
+# Ignore environment variables
+.env
+.env.local
+
+# Ignore IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Ignore logs
+logs/
+*.log
+npm-debug.log*
+
+# Ignore dist/build folders
+dist/
+build/
+
+# Ignore temporary files
+tmp/
+temp/
+
+# Ignore OS specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db

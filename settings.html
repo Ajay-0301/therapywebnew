@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Therapy Notes - Dashboard</title>
+    <title>Therapy Notes - Settings</title>
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/sidebar.css">
-    <link rel="stylesheet" href="css/dashboard-page.css">
+    <link rel="stylesheet" href="css/settings.css">
 </head>
 <body>
     <div class="dashboard-container">
@@ -43,7 +43,7 @@
             </div>
 
             <nav class="sidebar-nav">
-                <button class="nav-item active" data-page="dashboard">
+                <button class="nav-item" data-page="dashboard">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M2 4a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H3a1 1 0 01-1-1V4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V4zM2 14a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H3a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/>
                     </svg>
@@ -61,7 +61,7 @@
                     </svg>
                     <span>Insights</span>
                 </button>
-                <button class="nav-item" data-page="settings">
+                <button class="nav-item active" data-page="settings">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M10.894 2.553a1 1 0 00-1.788 0l-.783 2.802c-.596.194-1.165.486-1.684.82L5.60 4.747a1 1 0 00-1.477.316l-1.592 2.757a1 1 0 00.316 1.477l2.185 1.263a6.041 6.041 0 00-.07 1.586l-2.185 1.263a1 1 0 00-.316 1.477l1.592 2.757a1 1 0 001.477.316l2.039-1.428c.519.334 1.088.626 1.684.82l.783 2.802a1 1 0 001.788 0l.783-2.802c.596-.194 1.165-.486 1.684-.82l2.039 1.428a1 1 0 001.477-.316l1.592-2.757a1 1 0 00-.316-1.477l-2.185-1.263a6.041 6.041 0 00.07-1.586l2.185-1.263a1 1 0 00.316-1.477l-1.592-2.757a1 1 0 00-1.477-.316l-2.039 1.428c-.519-.334-1.088-.626-1.684-.82l-.783-2.802zm0 2.802a2 2 0 100 4 2 2 0 000-4z"/>
                     </svg>
@@ -87,91 +87,50 @@
                     <span></span>
                 </button>
             </div>
-            <!-- Dashboard Page -->
-            <section id="dashboard-page" class="page active">
+
+            <!-- Settings Page -->
+            <section id="settings-page" class="page active">
                 <div class="page-header">
                     <div>
-                        <h2>Dashboard</h2>
-                        <p class="page-subtitle">Welcome back! Here's your overview</p>
+                        <h2>Settings</h2>
+                        <p class="page-subtitle">Manage your account and preferences</p>
                     </div>
                 </div>
 
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="9" cy="7" r="4"></circle>
-                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                            </svg>
+                <div class="settings-container">
+                    <div class="settings-section">
+                        <h3>Account Information</h3>
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" id="settingsName" class="form-input" disabled>
                         </div>
-                        <div class="stat-content">
-                            <h3>Total Clients</h3>
-                            <p class="stat-number" id="statClients">0</p>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="settingsEmail" class="form-input" disabled>
                         </div>
                     </div>
 
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                                <path d="M9 11H3v2h6v-2zm0-4H3v2h6V7zm6 0v2h6V7h-6zm0 4v2h6v-2h-6zM9 3H3v2h6V3zm6 0v2h6V3h-6z"></path>
-                            </svg>
-                        </div>
-                        <div class="stat-content">
-                            <h3>Active Sessions</h3>
-                            <p class="stat-number" id="statSessions">0</p>
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                            </svg>
-                        </div>
-                        <div class="stat-content">
-                            <h3>Progress</h3>
-                            <p class="stat-number">85%</p>
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path>
-                            </svg>
-                        </div>
-                        <div class="stat-content">
-                            <h3>Completed Cases</h3>
-                            <p class="stat-number" id="statCompleted">0</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="content-section">
-                    <h3>Recent Activity</h3>
-                    <div class="activity-list">
-                        <div class="activity-item">
-                            <div class="activity-indicator"></div>
-                            <div class="activity-content">
-                                <p class="activity-title">New client added</p>
-                                <p class="activity-time">2 hours ago</p>
+                    <div class="settings-section">
+                        <h3>Preferences</h3>
+                        <div class="preference-item">
+                            <div>
+                                <p class="preference-title">Email Notifications</p>
+                                <p class="preference-desc">Receive notifications about new clients</p>
                             </div>
+                            <label class="toggle">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
                         </div>
-                        <div class="activity-item">
-                            <div class="activity-indicator"></div>
-                            <div class="activity-content">
-                                <p class="activity-title">Session completed</p>
-                                <p class="activity-time">5 hours ago</p>
+                        <div class="preference-item">
+                            <div>
+                                <p class="preference-title">Dark Mode</p>
+                                <p class="preference-desc">Coming soon</p>
                             </div>
-                        </div>
-                        <div class="activity-item">
-                            <div class="activity-indicator"></div>
-                            <div class="activity-content">
-                                <p class="activity-title">Progress note added</p>
-                                <p class="activity-time">1 day ago</p>
-                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" disabled>
+                                <span class="toggle-slider"></span>
+                            </label>
                         </div>
                     </div>
                 </div>

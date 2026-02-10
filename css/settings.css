@@ -43,49 +43,7 @@
     border-radius: 2px;
 }
 
-/* Form Fields */
-.form-group {
-    margin-bottom: 18px;
-}
-
-.form-group:last-child {
-    margin-bottom: 0;
-}
-
-.form-group label {
-    display: block;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.form-input {
-    width: 100%;
-    padding: 11px 16px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    font-size: 14px;
-    color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.8);
-    transition: var(--transition);
-    box-shadow: var(--shadow-sm);
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
-    background: white;
-}
-
-.form-input:disabled {
-    background: rgba(241, 245, 249, 0.8);
-    color: var(--text-tertiary);
-    cursor: not-allowed;
-}
+/* Form styles (form-group, form-input) are in base.css */
 
 /* Preference Toggles */
 .preference-item {

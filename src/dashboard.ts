@@ -31,7 +31,14 @@ function initializeDashboard(): void {
     setupNavigation();
     setupEventListeners();
     setupUserNameEdit();
-    updateStats();
+
+    // Load page-specific data based on current page
+    const currentFile = window.location.pathname.split('/').pop() || 'dashboard.html';
+    if (currentFile === 'dashboard.html') {
+        updateStats();
+    } else if (currentFile === 'clients.html') {
+        renderClientsList();
+    }
 }
 
 // ========================================================================
@@ -91,51 +98,52 @@ function setupUserNameEdit(): void {
 }
 
 // ========================================================================
-// NAVIGATION SYSTEM
+// NAVIGATION SYSTEM (Multi-page)
 // ========================================================================
 
 function setupNavigation(): void {
     const navButtons = document.querySelectorAll('.nav-item');
 
+    // Map page names to HTML files
+    const pageMap: { [key: string]: string } = {
+        dashboard: 'dashboard.html',
+        clients: 'clients.html',
+        insights: 'insights.html',
+        settings: 'settings.html',
+    };
+
     navButtons.forEach((button) => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
             const pageName = (button as HTMLElement).getAttribute('data-page');
-            if (pageName) {
-                navigateToPage(pageName);
+            if (pageName && pageMap[pageName]) {
+                window.location.href = pageMap[pageName];
             }
         });
     });
+
+    // Highlight the current page's nav item
+    highlightCurrentPage();
 }
 
-function navigateToPage(pageName: string): void {
-    // Hide all pages
-    const pages = document.querySelectorAll('.page');
-    pages.forEach((page) => {
-        page.classList.remove('active');
-    });
+function highlightCurrentPage(): void {
+    const currentFile = window.location.pathname.split('/').pop() || 'dashboard.html';
+    const fileToPage: { [key: string]: string } = {
+        'dashboard.html': 'dashboard',
+        'clients.html': 'clients',
+        'insights.html': 'insights',
+        'settings.html': 'settings',
+    };
 
-    // Show selected page
-    const selectedPage = document.getElementById(`${pageName}-page`);
-    if (selectedPage) {
-        selectedPage.classList.add('active');
-    }
+    const currentPageName = fileToPage[currentFile] || 'dashboard';
 
-    // Update nav button active state
     const navButtons = document.querySelectorAll('.nav-item');
     navButtons.forEach((button) => {
         button.classList.remove('active');
-        if ((button as HTMLElement).getAttribute('data-page') === pageName) {
+        if ((button as HTMLElement).getAttribute('data-page') === currentPageName) {
             button.classList.add('active');
         }
     });
-
-    // Load page-specific data
-    if (pageName === 'clients') {
-        renderClientsList();
-    } else if (pageName === 'dashboard') {
-        updateStats();
-    }
 }
 
 // ========================================================================

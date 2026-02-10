@@ -1,37 +1,7 @@
 /* ========================================================================
-   DASHBOARD PAGE - Header, Stats, Activity
+   DASHBOARD PAGE - Stats, Activity
+   (Page header styles are in base.css)
    ======================================================================== */
-
-/* Page Header */
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 32px;
-    background: var(--card-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    padding: 36px;
-    border-radius: 16px;
-    border: 1px solid var(--card-border);
-    box-shadow: var(--card-shadow);
-    gap: 20px;
-}
-
-.page-header h2 {
-    font-size: 32px;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin-bottom: 6px;
-    letter-spacing: -0.5px;
-}
-
-.page-subtitle {
-    font-size: 15px;
-    color: var(--text-secondary);
-    margin: 0;
-    font-weight: 500;
-}
 
 /* ========================================================================
    STATS GRID
@@ -212,15 +182,6 @@
    ======================================================================== */
 
 @media (max-width: 1024px) {
-    .page-header {
-        padding: 28px 20px;
-        margin-bottom: 24px;
-    }
-
-    .page-header h2 {
-        font-size: 26px;
-    }
-
     .stat-card {
         flex-direction: column;
         text-align: center;

@@ -1,36 +1,46 @@
 // ========================================
-// THERAPY NOTES - AUTHENTICATION SCRIPT
+// THERAPY NOTES - AUTHENTICATION SCRIPT (TypeScript)
 // ========================================
 
+// Type definitions
+interface UserData {
+    email: string;
+    name: string;
+    id?: string;
+    registeredAt: string;
+}
+
+type PasswordStrength = 'weak' | 'medium' | 'strong' | '';
+
 // DOM Elements
-const loginContainer = document.getElementById('loginContainer');
-const registerContainer = document.getElementById('registerContainer');
-const loginForm = document.getElementById('loginForm');
-const registerForm = document.getElementById('registerForm');
-const switchToRegister = document.getElementById('switchToRegister');
-const switchToLogin = document.getElementById('switchToLogin');
+const loginContainer = document.getElementById('loginContainer') as HTMLDivElement;
+const registerContainer = document.getElementById('registerContainer') as HTMLDivElement;
+const loginForm = document.getElementById('loginForm') as HTMLFormElement;
+const registerForm = document.getElementById('registerForm') as HTMLFormElement;
+const switchToRegister = document.getElementById('switchToRegister') as HTMLButtonElement;
+const switchToLogin = document.getElementById('switchToLogin') as HTMLButtonElement;
 
 // Password Toggle Elements
-const toggleLoginPassword = document.getElementById('toggleLoginPassword');
-const toggleRegisterPassword = document.getElementById('toggleRegisterPassword');
-const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+const toggleLoginPassword = document.getElementById('toggleLoginPassword') as HTMLButtonElement;
+const toggleRegisterPassword = document.getElementById('toggleRegisterPassword') as HTMLButtonElement;
+const toggleConfirmPassword = document.getElementById('toggleConfirmPassword') as HTMLButtonElement;
 
-const loginPasswordInput = document.getElementById('loginPassword');
-const registerPasswordInput = document.getElementById('registerPassword');
-const confirmPasswordInput = document.getElementById('confirmPassword');
+const loginPasswordInput = document.getElementById('loginPassword') as HTMLInputElement;
+const registerPasswordInput = document.getElementById('registerPassword') as HTMLInputElement;
+const confirmPasswordInput = document.getElementById('confirmPassword') as HTMLInputElement;
 
-const passwordStreng = document.getElementById('passwordStrength');
+const passwordStrengthElement = document.getElementById('passwordStrength') as HTMLDivElement;
 
 // ========================================
 // SWITCH BETWEEN LOGIN & REGISTER
 // ========================================
 
-switchToRegister.addEventListener('click', () => {
+switchToRegister.addEventListener('click', (): void => {
     loginContainer.style.display = 'none';
     registerContainer.style.display = 'grid';
 });
 
-switchToLogin.addEventListener('click', () => {
+switchToLogin.addEventListener('click', (): void => {
     registerContainer.style.display = 'none';
     loginContainer.style.display = 'grid';
     resetForms();
@@ -40,8 +50,8 @@ switchToLogin.addEventListener('click', () => {
 // PASSWORD TOGGLE FUNCTIONALITY
 // ========================================
 
-const togglePassword = (button, input) => {
-    button.addEventListener('click', (e) => {
+const togglePassword = (button: HTMLButtonElement, input: HTMLInputElement): void => {
+    button.addEventListener('click', (e: MouseEvent): void => {
         e.preventDefault();
         const type = input.type === 'password' ? 'text' : 'password';
         input.type = type;
@@ -56,10 +66,10 @@ togglePassword(toggleConfirmPassword, confirmPasswordInput);
 // PASSWORD STRENGTH INDICATOR
 // ========================================
 
-const checkPasswordStrength = (password) => {
+const checkPasswordStrength = (password: string): PasswordStrength => {
     if (password.length === 0) return '';
     
-    let strength = 0;
+    let strength: number = 0;
     
     // Length check
     if (password.length >= 8) strength++;
@@ -82,9 +92,9 @@ const checkPasswordStrength = (password) => {
     return 'strong';
 };
 
-registerPasswordInput.addEventListener('input', () => {
-    const strength = checkPasswordStrength(registerPasswordInput.value);
-    const strengthDisplay = document.getElementById('passwordStrength');
+registerPasswordInput.addEventListener('input', (): void => {
+    const strength: PasswordStrength = checkPasswordStrength(registerPasswordInput.value);
+    const strengthDisplay = document.getElementById('passwordStrength') as HTMLDivElement;
     
     if (registerPasswordInput.value.length > 0) {
         strengthDisplay.classList.add('show');
@@ -98,48 +108,59 @@ registerPasswordInput.addEventListener('input', () => {
 // FORM VALIDATION
 // ========================================
 
-const validateEmail = (email) => {
+const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
 };
 
-const validatePassword = (password) => {
+const validatePassword = (password: string): boolean => {
     return password.length >= 8;
 };
 
-const validateName = (name) => {
+const validateName = (name: string): boolean => {
     return name.trim().length >= 2;
 };
 
-const validateID = (id) => {
+const validateID = (id: string): boolean => {
     return id.trim().length >= 3;
 };
 
-const showError = (input, errorElement, message) => {
+const showError = (input: HTMLInputElement, errorElement: HTMLElement, message: string): void => {
     input.classList.add('error');
     errorElement.textContent = message;
     errorElement.classList.add('show');
 };
 
-const clearError = (input, errorElement) => {
+const clearError = (input: HTMLInputElement, errorElement: HTMLElement): void => {
     input.classList.remove('error');
     errorElement.textContent = '';
     errorElement.classList.remove('show');
 };
 
 // ========================================
+// SUCCESS MESSAGE (for auth pages)
+// ========================================
+
+const displaySuccessMessage = (): void => {
+    const modal = document.getElementById('successModal') as HTMLElement;
+    if (modal) {
+        modal.classList.add('show');
+    }
+};
+
+// ========================================
 // LOGIN FORM HANDLING
 // ========================================
 
-loginForm.addEventListener('submit', (e) => {
+loginForm.addEventListener('submit', (e: SubmitEvent): void => {
     e.preventDefault();
     
-    const email = document.getElementById('loginEmail');
-    const password = document.getElementById('loginPassword');
-    const emailError = document.getElementById('emailError');
-    const passwordError = document.getElementById('passwordError');
+    const email = document.getElementById('loginEmail') as HTMLInputElement;
+    const password = document.getElementById('loginPassword') as HTMLInputElement;
+    const emailError = document.getElementById('emailError') as HTMLElement;
+    const passwordError = document.getElementById('passwordError') as HTMLElement;
     
-    let isValid = true;
+    let isValid: boolean = true;
     
     // Validate email
     if (!email.value.trim()) {
@@ -165,10 +186,10 @@ loginForm.addEventListener('submit', (e) => {
     
     if (isValid) {
         // Check if it's demo login
-        const isDemoLogin = email.value === 'demo@therapy.com' && password.value === 'Demo@12345';
+        const isDemoLogin: boolean = email.value === 'demo@therapy.com' && password.value === 'Demo@12345';
         
         // Save user data to localStorage
-        const userData = {
+        const userData: UserData = {
             email: email.value,
             name: isDemoLogin ? 'Dr. Demo Therapist' : 'Dr. ' + email.value.split('@')[0],
             registeredAt: new Date().toISOString()
@@ -177,12 +198,12 @@ loginForm.addEventListener('submit', (e) => {
         localStorage.setItem('userData', JSON.stringify(userData));
         
         // Show success message
-        alert('✓ Login successful! Redirecting to dashboard...');
+        displaySuccessMessage();
         
         // Redirect to dashboard
-        setTimeout(() => {
+        setTimeout((): void => {
             window.location.href = 'dashboard.html';
-        }, 500);
+        }, 2000);
     }
 });
 
@@ -190,23 +211,23 @@ loginForm.addEventListener('submit', (e) => {
 // REGISTER FORM HANDLING
 // ========================================
 
-registerForm.addEventListener('submit', (e) => {
+registerForm.addEventListener('submit', (e: SubmitEvent): void => {
     e.preventDefault();
     
-    const name = document.getElementById('registerName');
-    const email = document.getElementById('registerEmail');
-    const id = document.getElementById('registerId');
-    const password = document.getElementById('registerPassword');
-    const confirmPassword = document.getElementById('confirmPassword');
-    const termsCheckbox = document.querySelector('input[name="terms"]');
+    const name = document.getElementById('registerName') as HTMLInputElement;
+    const email = document.getElementById('registerEmail') as HTMLInputElement;
+    const id = document.getElementById('registerId') as HTMLInputElement;
+    const password = document.getElementById('registerPassword') as HTMLInputElement;
+    const confirmPassword = document.getElementById('confirmPassword') as HTMLInputElement;
+    const termsCheckbox = document.querySelector('input[name="terms"]') as HTMLInputElement;
     
-    const nameError = document.getElementById('nameError');
-    const emailError = document.getElementById('registerEmailError');
-    const idError = document.getElementById('idError');
-    const passwordError = document.getElementById('registerPasswordError');
-    const confirmError = document.getElementById('confirmError');
+    const nameError = document.getElementById('nameError') as HTMLElement;
+    const emailError = document.getElementById('registerEmailError') as HTMLElement;
+    const idError = document.getElementById('idError') as HTMLElement;
+    const passwordError = document.getElementById('registerPasswordError') as HTMLElement;
+    const confirmError = document.getElementById('confirmError') as HTMLElement;
     
-    let isValid = true;
+    let isValid: boolean = true;
     
     // Validate name
     if (!name.value.trim()) {
@@ -271,7 +292,7 @@ registerForm.addEventListener('submit', (e) => {
     
     if (isValid) {
         // Save user data to localStorage
-        const userData = {
+        const userData: UserData = {
             name: name.value,
             email: email.value,
             id: id.value,
@@ -281,14 +302,16 @@ registerForm.addEventListener('submit', (e) => {
         localStorage.setItem('userData', JSON.stringify(userData));
         
         // Show success message
-        alert('✓ Account created successfully! Redirecting to dashboard...');
+        displaySuccessMessage();
         
         // Optional: Reset form
         registerForm.reset();
-        passwordStreng.classList.remove('show');
+        passwordStrengthElement.classList.remove('show');
         
         // Redirect to dashboard
-        window.location.href = 'dashboard.html';
+        setTimeout((): void => {
+            window.location.href = 'dashboard.html';
+        }, 2000);
     }
 });
 
@@ -296,45 +319,45 @@ registerForm.addEventListener('submit', (e) => {
 // CLEAR ERRORS ON INPUT
 // ========================================
 
-document.getElementById('loginEmail').addEventListener('input', function() {
+(document.getElementById('loginEmail') as HTMLInputElement).addEventListener('input', function(): void {
     if (this.classList.contains('error')) {
-        clearError(this, document.getElementById('emailError'));
+        clearError(this, document.getElementById('emailError') as HTMLElement);
     }
 });
 
-document.getElementById('loginPassword').addEventListener('input', function() {
+(document.getElementById('loginPassword') as HTMLInputElement).addEventListener('input', function(): void {
     if (this.classList.contains('error')) {
-        clearError(this, document.getElementById('passwordError'));
+        clearError(this, document.getElementById('passwordError') as HTMLElement);
     }
 });
 
-document.getElementById('registerName').addEventListener('input', function() {
+(document.getElementById('registerName') as HTMLInputElement).addEventListener('input', function(): void {
     if (this.classList.contains('error')) {
-        clearError(this, document.getElementById('nameError'));
+        clearError(this, document.getElementById('nameError') as HTMLElement);
     }
 });
 
-document.getElementById('registerEmail').addEventListener('input', function() {
+(document.getElementById('registerEmail') as HTMLInputElement).addEventListener('input', function(): void {
     if (this.classList.contains('error')) {
-        clearError(this, document.getElementById('registerEmailError'));
+        clearError(this, document.getElementById('registerEmailError') as HTMLElement);
     }
 });
 
-document.getElementById('registerId').addEventListener('input', function() {
+(document.getElementById('registerId') as HTMLInputElement).addEventListener('input', function(): void {
     if (this.classList.contains('error')) {
-        clearError(this, document.getElementById('idError'));
+        clearError(this, document.getElementById('idError') as HTMLElement);
     }
 });
 
-document.getElementById('registerPassword').addEventListener('input', function() {
+(document.getElementById('registerPassword') as HTMLInputElement).addEventListener('input', function(): void {
     if (this.classList.contains('error')) {
-        clearError(this, document.getElementById('registerPasswordError'));
+        clearError(this, document.getElementById('registerPasswordError') as HTMLElement);
     }
 });
 
-document.getElementById('confirmPassword').addEventListener('input', function() {
+(document.getElementById('confirmPassword') as HTMLInputElement).addEventListener('input', function(): void {
     if (this.classList.contains('error')) {
-        clearError(this, document.getElementById('confirmError'));
+        clearError(this, document.getElementById('confirmError') as HTMLElement);
     }
 });
 
@@ -342,37 +365,37 @@ document.getElementById('confirmPassword').addEventListener('input', function() 
 // RESET FORMS
 // ========================================
 
-const resetForms = () => {
+const resetForms = (): void => {
     loginForm.reset();
     registerForm.reset();
     
     // Clear all errors
-    document.querySelectorAll('.error-message').forEach(element => {
+    document.querySelectorAll('.error-message').forEach((element: Element): void => {
         element.classList.remove('show');
-        element.textContent = '';
+        (element as HTMLElement).textContent = '';
     });
     
-    document.querySelectorAll('.form-group input').forEach(input => {
+    document.querySelectorAll('.form-group input').forEach((input: Element): void => {
         input.classList.remove('error');
     });
     
-    document.getElementById('passwordStrength').classList.remove('show');
+    (document.getElementById('passwordStrength') as HTMLElement).classList.remove('show');
 };
 
 // ========================================
 // ENTER KEY SUBMISSION
 // ========================================
 
-loginForm.addEventListener('keypress', (e) => {
+loginForm.addEventListener('keypress', (e: KeyboardEvent): void => {
     if (e.key === 'Enter') {
         loginForm.dispatchEvent(new Event('submit'));
     }
 });
 
-registerForm.addEventListener('keypress', (e) => {
+registerForm.addEventListener('keypress', (e: KeyboardEvent): void => {
     if (e.key === 'Enter') {
         registerForm.dispatchEvent(new Event('submit'));
     }
 });
 
-console.log('✓ Therapy Notes Authentication System Loaded');
+console.log('✓ Therapy Notes Authentication System Loaded (TypeScript)');

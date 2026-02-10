@@ -351,8 +351,6 @@ body {
     border-color: #dc2626;
     background-color: rgba(220, 38, 38, 0.05);
 }
-    color: var(--text-secondary);
-}
 
 .toggle-password:hover {
     color: var(--primary-color);
@@ -623,6 +621,33 @@ body {
 }
 
 /* ========================================
+   DEMO SECTION
+   ======================================== */
+
+.demo-section {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border: 2px solid var(--primary-green-light);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-top: 26px;
+    text-align: center;
+}
+
+.demo-title {
+    font-size: 0.95em;
+    font-weight: 700;
+    color: var(--primary-green-dark);
+    margin-bottom: 10px;
+}
+
+.demo-text {
+    font-size: 0.9em;
+    color: var(--text-dark);
+    font-weight: 500;
+    margin: 4px 0;
+}
+
+/* ========================================
    RESPONSIVE DESIGN
    ======================================== */
 
@@ -732,4 +757,123 @@ body {
 /* Smooth transitions for all interactive elements */
 button, input, a {
     transition: var(--transition);
+}
+
+/* ========================================
+   SUCCESS MESSAGE MODAL
+   ======================================== */
+
+.success-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    animation: fadeInOverlay 0.3s ease;
+}
+
+.success-modal.show {
+    display: flex;
+}
+
+@keyframes fadeInOverlay {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.success-content {
+    background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+    border-radius: 20px;
+    padding: 60px 40px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(16, 185, 129, 0.3);
+    border: 2px solid var(--primary-green);
+    max-width: 400px;
+    animation: slideUpSuccess 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideUpSuccess {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.success-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-green) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    font-size: 48px;
+    color: white;
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+    animation: scaleInSuccess 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes scaleInSuccess {
+    from {
+        transform: scale(0);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+
+.success-content h1 {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin-bottom: 16px;
+    letter-spacing: -0.5px;
+}
+
+.success-message {
+    font-size: 16px;
+    color: var(--text-gray);
+    margin-bottom: 8px;
+}
+
+.success-subtitle {
+    font-size: 14px;
+    color: var(--text-light);
+    margin-bottom: 24px;
+}
+
+.success-loader {
+    width: 40px;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, var(--primary-green), transparent);
+    border-radius: 4px;
+    margin: 0 auto;
+    animation: slideLoader 1.5s ease-in-out infinite;
+}
+
+@keyframes slideLoader {
+    0% {
+        background-position: -40px 0;
+    }
+    50% {
+        background-position: 40px 0;
+    }
+    100% {
+        background-position: -40px 0;
+    }
 }

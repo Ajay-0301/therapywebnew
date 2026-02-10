@@ -90,6 +90,12 @@
                     <a href="#">Terms of Service</a> and 
                     <a href="#">Privacy Policy</a>
                 </p>
+
+                <div class="demo-section">
+                    <p class="demo-title">🎯 Demo Account</p>
+                    <p class="demo-text">Email: <strong>demo@therapy.com</strong></p>
+                    <p class="demo-text">Password: <strong>Demo@12345</strong></p>
+                </div>
             </div>
         </div>
     </div>
@@ -215,6 +221,17 @@
         </div>
     </div>
 
-    <script src="js/auth.js"></script>
+    <!-- Success Message Modal -->
+    <div class="success-modal" id="successModal">
+        <div class="success-content">
+            <div class="success-icon">✓</div>
+            <h1>Welcome Back!</h1>
+            <p class="success-message">You have successfully logged in</p>
+            <p class="success-subtitle">Redirecting to dashboard...</p>
+            <div class="success-loader"></div>
+        </div>
+    </div>
+
+    <script src="dist/auth.bundle.js"></script>
 </body>
 </html>

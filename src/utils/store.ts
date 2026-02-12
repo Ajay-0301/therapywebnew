@@ -65,6 +65,7 @@ export interface UserData {
     name: string;
     id?: string;
     registeredAt?: string;
+    avatar?: string; // optional base64 data URL or image URL
 }
 
 // LocalStorage helpers

@@ -32,6 +32,7 @@ export default function Clients() {
   const [age, setAge] = useState(0);
   const [clientIdValid, setClientIdValid] = useState<boolean | null>(null);
   const [suggestedId, setSuggestedId] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // Timer for age spinner hold-to-increment
   const ageTimer = useRef<number | null>(null);
@@ -65,6 +66,7 @@ export default function Clients() {
     setClientIdValid(true);
     setSuggestedId('');
     setModalOpen(true);
+    setFieldErrors({});
   }
 
   function openEdit(c: Client) {
@@ -81,6 +83,7 @@ export default function Clients() {
     setClientIdValid(true);
     setSuggestedId('');
     setModalOpen(true);
+    setFieldErrors({});
   }
 
   function startAgeChange(delta: number) {
@@ -102,6 +105,44 @@ export default function Clients() {
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    // clear previous errors
+    setFieldErrors({});
+
+    // client-side required validation (replace native browser tooltips)
+    const errors: string[] = [];
+    const errs: Record<string, string> = {};
+    if (!clientId.trim()) {
+      errs.clientId = 'Please fill out Client ID';
+      errors.push('Please fill out Client ID');
+    }
+    if (!name.trim()) {
+      errs.name = 'Please fill out Client Name';
+      errors.push('Please fill out Client Name');
+    }
+    if (contactType === 'email') {
+      if (!email.trim()) {
+        errs.contact = 'Please fill out Email';
+        errors.push('Please fill out Email');
+      }
+    } else {
+      if (!phone.trim()) {
+        errs.contact = 'Please fill out Phone number';
+        errors.push('Please fill out Phone number');
+      }
+    }
+    if (!gender) {
+      errs.gender = 'Please select Gender';
+      errors.push('Please select Gender');
+    }
+    if (!relationshipStatus) {
+      errs.relationshipStatus = 'Please select Relationship Status';
+      errors.push('Please select Relationship Status');
+    }
+    if (errors.length) {
+      setFieldErrors(errs);
+      return;
+    }
+
     // normalize id on save
     const normalizedId = clientId.trim().toUpperCase();
     setClientId(normalizedId);
@@ -111,6 +152,7 @@ export default function Clients() {
       setClientIdError('This Client ID is already used. Choose another.');
       setClientIdValid(false);
       setSuggestedId(generateClientId());
+      setFieldErrors((f) => ({ ...f, clientId: 'Client ID already used' }));
       return;
     }
     if (editingClient) {
@@ -255,6 +297,7 @@ export default function Clients() {
                 &times;
               </button>
             </div>
+            {/* Top-level form summary removed — using inline field errors only */}
             <form className="modal-form" onSubmit={handleSubmit}>
               {/* Client ID - auto generated, read only */}
               <div className="form-group id-field">
@@ -267,6 +310,7 @@ export default function Clients() {
                       const raw = e.target.value;
                       setClientId(raw);
                       setClientIdError('');
+                      setFieldErrors((f) => ({ ...f, clientId: '' }));
                       const norm = raw.trim().toUpperCase();
                       if (!norm) {
                         setClientIdValid(null);
@@ -282,7 +326,6 @@ export default function Clients() {
                         setSuggestedId('');
                       }
                     }}
-                    required
                     aria-invalid={clientIdValid === false}
                   />
                   {clientIdValid === true && (
@@ -297,6 +340,7 @@ export default function Clients() {
                   )}
                 </div>
                 {clientIdError && <div className="field-error">{clientIdError}</div>}
+                {fieldErrors.clientId && <div className="field-error">{fieldErrors.clientId}</div>}
                 {suggestedId && (
                   <div className="id-suggestion">
                     <span>Suggested: <strong>{suggestedId}</strong></span>
@@ -312,11 +356,14 @@ export default function Clients() {
                 <label>Client Name</label>
                 <input
                   type="text"
-                  required
                   placeholder="Full name"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => {
+                    setName(e.target.value);
+                    setFieldErrors((f) => ({ ...f, name: '' }));
+                  }}
                 />
+                {fieldErrors.name && <div className="field-error">{fieldErrors.name}</div>}
               </div>
 
               {/* Email or Phone toggle */}
@@ -339,21 +386,31 @@ export default function Clients() {
                   </button>
                 </div>
                 {contactType === 'email' ? (
-                  <input
-                    type="email"
-                    required
-                    placeholder="email@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
+                  <>
+                    <input
+                      type="email"
+                      placeholder="email@example.com"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        setFieldErrors((f) => ({ ...f, contact: '' }));
+                      }}
+                    />
+                    {fieldErrors.contact && <div className="field-error">{fieldErrors.contact}</div>}
+                  </>
                 ) : (
-                  <input
-                    type="tel"
-                    required
-                    placeholder="+1 (555) 000-0000"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                  />
+                  <>
+                    <input
+                      type="tel"
+                      placeholder="+1 (555) 000-0000"
+                      value={phone}
+                      onChange={(e) => {
+                        setPhone(e.target.value);
+                        setFieldErrors((f) => ({ ...f, contact: '' }));
+                      }}
+                    />
+                    {fieldErrors.contact && <div className="field-error">{fieldErrors.contact}</div>}
+                  </>
                 )}
               </div>
 
@@ -361,9 +418,11 @@ export default function Clients() {
               <div className="form-group">
                 <label>Gender</label>
                 <select
-                  required
                   value={gender}
-                  onChange={(e) => setGender(e.target.value)}
+                  onChange={(e) => {
+                    setGender(e.target.value);
+                    setFieldErrors((f) => ({ ...f, gender: '' }));
+                  }}
                 >
                   <option value="" disabled>Select gender</option>
                   {GENDER_OPTIONS.map((g) => (
@@ -376,9 +435,11 @@ export default function Clients() {
               <div className="form-group">
                 <label>Relationship Status</label>
                 <select
-                  required
                   value={relationshipStatus}
-                  onChange={(e) => setRelationshipStatus(e.target.value)}
+                  onChange={(e) => {
+                    setRelationshipStatus(e.target.value);
+                    setFieldErrors((f) => ({ ...f, relationshipStatus: '' }));
+                  }}
                 >
                   <option value="" disabled>Select status</option>
                   {RELATIONSHIP_OPTIONS.map((r) => (

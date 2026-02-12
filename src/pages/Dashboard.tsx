@@ -34,9 +34,7 @@ export default function Dashboard() {
     .filter((s) => s.scheduledDate > Date.now())
     .sort((a, b) => a.scheduledDate - b.scheduledDate);
 
-  const completedCases = clients.filter(
-    (c) => c.condition?.toLowerCase().includes('completed')
-  ).length;
+  const completedCases = deletedClients.length;
 
   return (
     <section className="page active">
@@ -149,10 +147,10 @@ export default function Dashboard() {
               deletedClients.slice(0, 5).map((dc) => (
                 <div key={dc.id} className="box-item">
                   <div className="box-item-icon deleted-accent">
-                    {dc.firstName.charAt(0)}{dc.lastName.charAt(0)}
+                    {dc.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="box-item-info">
-                    <p className="box-item-name">{dc.firstName} {dc.lastName}</p>
+                    <p className="box-item-name">{dc.name}</p>
                     <p className="box-item-detail">{timeAgo(dc.deletedAt)}</p>
                   </div>
                 </div>

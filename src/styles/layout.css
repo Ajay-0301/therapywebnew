@@ -163,6 +163,10 @@
     margin-left: 0;
 }
 
+.main-content.expanded {
+    margin-left: 0;
+}
+
 /* Hamburger */
 .mobile-menu-toggle {
     display: block;
@@ -201,6 +205,32 @@
     border-radius: 2px;
     transition: transform 0.18s ease, opacity 0.18s ease;
 }
+
+/* chevron removed from floating hamburger */
+
+/* Sidebar header toggle (arrow) */
+.sidebar-header {
+    padding: 28px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sidebar-toggle {
+    background: transparent;
+    border: none;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.18s ease, transform 0.18s ease;
+}
+.sidebar-toggle:hover { background: rgba(15,23,42,0.04); transform: translateX(-2px);} 
+.sidebar-toggle.collapsed svg { transform: rotate(180deg); }
+
 
 /* Page Header */
 .page-header {
@@ -257,4 +287,9 @@
     .page-header h2 {
         font-size: 26px;
     }
+}
+
+/* ensure mobile toggle sits visually near header when open */
+@media (min-width: 1025px) {
+    .mobile-menu-toggle { top: 26px; }
 }

@@ -1,0 +1,545 @@
+/* ========================================================================
+   CLIENT PROFILE PAGE
+   ======================================================================== */
+
+.profile-page {
+    max-width: 860px;
+}
+
+.btn-back {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: var(--transition);
+}
+
+.btn-back:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* ========================================================================
+   PROFILE CARD
+   ======================================================================== */
+
+.profile-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    transition: var(--transition);
+}
+
+.profile-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.profile-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+}
+
+.profile-card-header h3 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.btn-edit {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.btn-edit:hover {
+    background: rgba(102, 126, 234, 0.08);
+    color: var(--primary);
+}
+
+/* ========================================================================
+   FIELD BOX GRID
+   ======================================================================== */
+
+.field-box-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+    .field-box-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.field-box {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.field-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #b8860b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.field-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.field-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    background: white;
+    color: var(--text-primary);
+    transition: var(--transition);
+}
+
+.field-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.field-input.readonly {
+    background: #f3f4f6;
+    border-color: #e5e7eb;
+    cursor: default;
+}
+
+.age-spinner-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.age-input {
+    width: 60px;
+    text-align: center;
+}
+
+/* ========================================================================
+   PROFILE FIELDS
+   ======================================================================== */
+
+.profile-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.field-row {
+    display: flex;
+    gap: 16px;
+}
+
+.flex-grow {
+    flex: 1;
+}
+
+.field-small {
+    width: 120px;
+    flex-shrink: 0;
+}
+
+.field-group {
+    position: relative;
+    margin-bottom: 8px;
+}
+
+.field-group label {
+    position: absolute;
+    top: -8px;
+    left: 14px;
+    background: #f9fafb;
+    padding: 0 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #b8860b;
+    z-index: 1;
+}
+
+.field-group input,
+.field-group select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    font-size: 15px;
+    font-family: inherit;
+    background: white;
+    color: var(--text-primary);
+    transition: var(--transition);
+}
+
+.field-group input:focus,
+.field-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.field-readonly {
+    background: #f3f4f6 !important;
+    color: var(--text-primary) !important;
+    cursor: default !important;
+    border-color: #e5e7eb !important;
+}
+
+/* ========================================================================
+   STATUS TOGGLE
+   ======================================================================== */
+
+.status-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.status-label {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.status-btn {
+    padding: 8px 24px;
+    border-radius: 24px;
+    border: 2px solid #d1d5db;
+    background: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    color: var(--text-secondary);
+    font-family: inherit;
+}
+
+.status-btn.active {
+    background: #10b981;
+    color: white;
+    border-color: #10b981;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.status-btn.active.completed {
+    background: white;
+    color: #10b981;
+    border-color: #10b981;
+    box-shadow: none;
+}
+
+.status-btn:disabled:not(.active) {
+    opacity: 0.5;
+    cursor: default;
+}
+
+/* ========================================================================
+   SESSIONS COUNTER BOX
+   ======================================================================== */
+
+.sessions-box {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px 24px;
+}
+
+.sessions-box h4 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 14px 0;
+}
+
+.session-counter {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.counter-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    min-width: 80px;
+}
+
+.counter-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    background: white;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    color: var(--text-primary);
+}
+
+.counter-btn.increment {
+    background: #10b981;
+    color: white;
+    border-color: #10b981;
+}
+
+.counter-btn.increment:hover {
+    background: #059669;
+    transform: scale(1.05);
+}
+
+.counter-btn.decrement:hover {
+    background: #f3f4f6;
+}
+
+.sessions-hint {
+    font-size: 13px;
+    color: #9ca3af;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* ========================================================================
+   SECTION TITLES
+   ======================================================================== */
+
+.section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #6b4c00;
+    margin: 0 0 16px 0;
+}
+
+/* ========================================================================
+   TEXTAREAS
+   ======================================================================== */
+
+.profile-textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: inherit;
+    background: white;
+    color: var(--text-primary);
+    resize: vertical;
+    min-height: 80px;
+    transition: var(--transition);
+    line-height: 1.6;
+}
+
+.profile-textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.profile-textarea::placeholder {
+    color: #9ca3af;
+}
+
+/* ========================================================================
+   DATE INPUT
+   ======================================================================== */
+
+.date-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: inherit;
+    background: white;
+    color: var(--text-primary);
+    transition: var(--transition);
+    margin-bottom: 16px;
+    cursor: pointer;
+}
+
+.date-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* ========================================================================
+   SAVE SESSION BUTTON
+   ======================================================================== */
+
+.save-session-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+}
+
+.btn-save-session {
+    padding: 12px 28px;
+    border: none;
+    border-radius: 12px;
+    background: #10b981;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: inherit;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+}
+
+.btn-save-session:hover {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+}
+
+/* ========================================================================
+   SESSION HISTORY
+   ======================================================================== */
+
+.empty-history {
+    text-align: center;
+    color: var(--text-tertiary);
+    padding: 24px;
+    font-size: 14px;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.history-item {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    transition: var(--transition);
+}
+
+.history-item:hover {
+    border-color: rgba(102, 126, 234, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.history-number {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.history-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.history-date {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 6px 0;
+}
+
+.history-notes {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0 0 8px 0;
+    line-height: 1.5;
+}
+
+.history-followup {
+    font-size: 12px;
+    color: #10b981;
+    margin: 0 0 4px 0;
+    font-weight: 600;
+}
+
+.history-followup span {
+    color: var(--text-tertiary);
+    font-weight: 500;
+}
+
+.history-followup-notes {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin: 0;
+    font-style: italic;
+}
+
+/* ========================================================================
+   RESPONSIVE
+   ======================================================================== */
+
+@media (max-width: 600px) {
+    .profile-card {
+        padding: 20px 18px;
+    }
+
+    .field-row {
+        flex-direction: column;
+    }
+
+    .field-small {
+        width: 100%;
+    }
+
+    .status-row {
+        flex-wrap: wrap;
+    }
+
+    .profile-card-header h3 {
+        font-size: 18px;
+    }
+}

@@ -1,20 +1,49 @@
 // Shared types
+export interface SessionRecord {
+    id: string;
+    date: string;
+    notes: string;
+    followUpDate: string;
+    followUpNotes: string;
+}
+
 export interface Client {
     id: string;
-    firstName: string;
-    lastName: string;
+    clientId: string;
+    name: string;
     email: string;
-    phone?: string;
-    condition?: string;
+    phone: string;
+    gender: string;
+    relationshipStatus: string;
+    age: number;
+    occupation: string;
+    status: 'active' | 'completed';
+    sessionCount: number;
+    chiefComplaints: string;
+    hopi: string;
+    sessionHistory: SessionRecord[];
     createdAt: number;
 }
 
 export interface DeletedClient {
     id: string;
-    firstName: string;
-    lastName: string;
+    clientId: string;
+    name: string;
     email: string;
     deletedAt: number;
+}
+
+// Generate a readable client ID like CL-001, CL-002, etc.
+export function generateClientId(): string {
+    const clients = getClients();
+    const deleted = getDeletedClients();
+    const allIds = [...clients, ...deleted]
+        .map((c) => {
+            const match = ('clientId' in c ? (c as Client).clientId : '').match(/CL-(\d+)/);
+            return match ? parseInt(match[1], 10) : 0;
+        });
+    const maxNum = allIds.length > 0 ? Math.max(...allIds) : 0;
+    return `CL-${String(maxNum + 1).padStart(3, '0')}`;
 }
 
 export interface Appointment {

@@ -1,25 +1,40 @@
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect, FormEvent, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   getClients,
   saveClients,
   getDeletedClients,
   saveDeletedClients,
+  generateClientId,
   type Client,
 } from '../utils/store';
 import '../styles/clients.css';
 
+const GENDER_OPTIONS = ['Male', 'Female', 'Non-binary', 'Other', 'Prefer not to say'];
+const RELATIONSHIP_OPTIONS = ['Single', 'Married', 'Divorced', 'Widowed', 'In a Relationship', 'Separated', 'Other'];
+
 export default function Clients() {
+  const navigate = useNavigate();
   const [clients, setClients] = useState<Client[]>([]);
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
 
   // Form state
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [clientId, setClientId] = useState('');
+  const [clientIdError, setClientIdError] = useState('');
+  const [name, setName] = useState('');
+  const [contactType, setContactType] = useState<'email' | 'phone'>('email');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [condition, setCondition] = useState('');
+  const [gender, setGender] = useState('');
+  const [relationshipStatus, setRelationshipStatus] = useState('');
+  const [age, setAge] = useState(0);
+  const [clientIdValid, setClientIdValid] = useState<boolean | null>(null);
+  const [suggestedId, setSuggestedId] = useState('');
+
+  // Timer for age spinner hold-to-increment
+  const ageTimer = useRef<number | null>(null);
 
   useEffect(() => {
     setClients(getClients());
@@ -28,71 +43,120 @@ export default function Clients() {
   const filtered = clients.filter((c) => {
     const q = search.toLowerCase();
     return (
-      c.firstName.toLowerCase().includes(q) ||
-      c.lastName.toLowerCase().includes(q) ||
+      c.name.toLowerCase().includes(q) ||
+      c.clientId.toLowerCase().includes(q) ||
       c.email.toLowerCase().includes(q) ||
-      (c.condition || '').toLowerCase().includes(q)
+      c.phone.toLowerCase().includes(q) ||
+      c.gender.toLowerCase().includes(q)
     );
   });
 
   function openAdd() {
     setEditingClient(null);
-    setFirstName('');
-    setLastName('');
+    setClientId(generateClientId());
+    setClientIdError('');
+    setName('');
+    setContactType('email');
     setEmail('');
     setPhone('');
-    setCondition('');
+    setGender('');
+    setRelationshipStatus('');
+    setAge(0);
+    setClientIdValid(true);
+    setSuggestedId('');
     setModalOpen(true);
   }
 
   function openEdit(c: Client) {
     setEditingClient(c);
-    setFirstName(c.firstName);
-    setLastName(c.lastName);
+    setClientId(c.clientId);
+    setClientIdError('');
+    setName(c.name);
     setEmail(c.email);
-    setPhone(c.phone || '');
-    setCondition(c.condition || '');
+    setPhone(c.phone);
+    setContactType(c.email ? 'email' : 'phone');
+    setGender(c.gender);
+    setRelationshipStatus(c.relationshipStatus);
+    setAge(c.age);
+    setClientIdValid(true);
+    setSuggestedId('');
     setModalOpen(true);
+  }
+
+  function startAgeChange(delta: number) {
+    // apply immediately
+    setAge((a) => Math.max(0, Math.min(120, a + delta)));
+    // then start repeating
+    stopAgeChange();
+    ageTimer.current = window.setInterval(() => {
+      setAge((a) => Math.max(0, Math.min(120, a + delta)));
+    }, 150);
+  }
+
+  function stopAgeChange() {
+    if (ageTimer.current) {
+      clearInterval(ageTimer.current);
+      ageTimer.current = null;
+    }
   }
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    // normalize id on save
+    const normalizedId = clientId.trim().toUpperCase();
+    setClientId(normalizedId);
+    // validate clientId uniqueness
+    const dup = clients.find((c) => c.clientId.toUpperCase() === normalizedId && c.id !== editingClient?.id);
+    if (dup) {
+      setClientIdError('This Client ID is already used. Choose another.');
+      setClientIdValid(false);
+      setSuggestedId(generateClientId());
+      return;
+    }
     if (editingClient) {
       const updated = clients.map((c) =>
         c.id === editingClient.id
-          ? { ...c, firstName, lastName, email, phone, condition }
+          ? { ...c, clientId: normalizedId, name, email: contactType === 'email' ? email : '', phone: contactType === 'phone' ? phone : '', gender, relationshipStatus, age }
           : c
       );
       setClients(updated);
       saveClients(updated);
+      setModalOpen(false);
+      navigate(`/clients/${editingClient.id}`);
     } else {
       const newClient: Client = {
         id: crypto.randomUUID(),
-        firstName,
-        lastName,
-        email,
-        phone,
-        condition,
+        clientId: normalizedId,
+        name,
+        email: contactType === 'email' ? email : '',
+        phone: contactType === 'phone' ? phone : '',
+        gender,
+        relationshipStatus,
+        age,
+        occupation: '',
+        status: 'active',
+        sessionCount: 0,
+        chiefComplaints: '',
+        hopi: '',
+        sessionHistory: [],
         createdAt: Date.now(),
       };
       const updated = [newClient, ...clients];
       setClients(updated);
       saveClients(updated);
+      setModalOpen(false);
+      navigate(`/clients/${newClient.id}`);
     }
-    setModalOpen(false);
   }
 
   function handleDelete(id: string) {
     const client = clients.find((c) => c.id === id);
     if (!client) return;
-    if (!confirm(`Delete ${client.firstName} ${client.lastName}?`)) return;
-
-    // Move to deleted
     const deleted = getDeletedClients();
     deleted.unshift({
       id: client.id,
-      firstName: client.firstName,
-      lastName: client.lastName,
+      clientId: client.clientId,
+      name: client.name,
       email: client.email,
       deletedAt: Date.now(),
     });
@@ -119,7 +183,7 @@ export default function Clients() {
         <input
           type="text"
           className="search-input"
-          placeholder="Search clients..."
+          placeholder="Search by name, ID, email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -132,22 +196,38 @@ export default function Clients() {
           </div>
         ) : (
           filtered.map((c) => (
-            <div key={c.id} className="client-card" onClick={() => openEdit(c)}>
-              <div className="client-avatar">
-                {c.firstName.charAt(0)}
-                {c.lastName.charAt(0)}
+            <div key={c.id} className="client-card" onClick={() => navigate(`/clients/${c.id}`)}>
+              <div className="client-card-top">
+                <div className="client-avatar">
+                  {c.name.charAt(0).toUpperCase()}
+                </div>
+                <span className="client-id-badge">{c.clientId}</span>
               </div>
-              <p className="client-name">
-                {c.firstName} {c.lastName}
-              </p>
-              <p className="client-info">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                  <polyline points="22,6 12,13 2,6" />
-                </svg>
-                {c.email}
-              </p>
-              {c.condition && <span className="client-status">{c.condition}</span>}
+              <p className="client-name">{c.name}</p>
+              <div className="client-details">
+                {c.email && (
+                  <p className="client-info">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                      <polyline points="22,6 12,13 2,6" />
+                    </svg>
+                    {c.email}
+                  </p>
+                )}
+                {c.phone && (
+                  <p className="client-info">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" />
+                    </svg>
+                    {c.phone}
+                  </p>
+                )}
+                <div className="client-meta">
+                  {c.gender && <span className="client-tag gender-tag">{c.gender}</span>}
+                  {c.relationshipStatus && <span className="client-tag relationship-tag">{c.relationshipStatus}</span>}
+                  {c.age > 0 && <span className="client-tag age-tag">{c.age} yrs</span>}
+                </div>
+              </div>
               <button
                 className="btn-delete-client"
                 onClick={(e) => {
@@ -176,31 +256,174 @@ export default function Clients() {
               </button>
             </div>
             <form className="modal-form" onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label>First Name</label>
-                <input type="text" required value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+              {/* Client ID - auto generated, read only */}
+              <div className="form-group id-field">
+                <label>Client ID</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <input
+                    type="text"
+                    value={clientId}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      setClientId(raw);
+                      setClientIdError('');
+                      const norm = raw.trim().toUpperCase();
+                      if (!norm) {
+                        setClientIdValid(null);
+                        setSuggestedId('');
+                        return;
+                      }
+                      const dupLive = clients.find((c) => c.clientId.toUpperCase() === norm && c.id !== editingClient?.id);
+                      if (dupLive) {
+                        setClientIdValid(false);
+                        setSuggestedId(generateClientId());
+                      } else {
+                        setClientIdValid(true);
+                        setSuggestedId('');
+                      }
+                    }}
+                    required
+                    aria-invalid={clientIdValid === false}
+                  />
+                  {clientIdValid === true && (
+                    <span className="id-check valid" aria-hidden>
+                      ✓
+                    </span>
+                  )}
+                  {clientIdValid === false && (
+                    <span className="id-check invalid" aria-hidden>
+                      ✕
+                    </span>
+                  )}
+                </div>
+                {clientIdError && <div className="field-error">{clientIdError}</div>}
+                {suggestedId && (
+                  <div className="id-suggestion">
+                    <span>Suggested: <strong>{suggestedId}</strong></span>
+                    <button type="button" className="link-btn" onClick={() => { setClientId(suggestedId); setClientIdValid(true); setSuggestedId(''); setClientIdError(''); }}>
+                      Use suggestion
+                    </button>
+                  </div>
+                )}
               </div>
+
+              {/* Client Name */}
               <div className="form-group">
-                <label>Last Name</label>
-                <input type="text" required value={lastName} onChange={(e) => setLastName(e.target.value)} />
-              </div>
-              <div className="form-group">
-                <label>Email</label>
-                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-              </div>
-              <div className="form-group">
-                <label>Phone</label>
-                <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
-              </div>
-              <div className="form-group">
-                <label>Condition</label>
+                <label>Client Name</label>
                 <input
                   type="text"
-                  placeholder="e.g., Anxiety, Depression"
-                  value={condition}
-                  onChange={(e) => setCondition(e.target.value)}
+                  required
+                  placeholder="Full name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                 />
               </div>
+
+              {/* Email or Phone toggle */}
+              <div className="form-group">
+                <label>Contact</label>
+                <div className="contact-toggle">
+                  <button
+                    type="button"
+                    className={`toggle-btn ${contactType === 'email' ? 'active' : ''}`}
+                    onClick={() => setContactType('email')}
+                  >
+                    Email
+                  </button>
+                  <button
+                    type="button"
+                    className={`toggle-btn ${contactType === 'phone' ? 'active' : ''}`}
+                    onClick={() => setContactType('phone')}
+                  >
+                    Phone
+                  </button>
+                </div>
+                {contactType === 'email' ? (
+                  <input
+                    type="email"
+                    required
+                    placeholder="email@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                ) : (
+                  <input
+                    type="tel"
+                    required
+                    placeholder="+1 (555) 000-0000"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                  />
+                )}
+              </div>
+
+              {/* Gender */}
+              <div className="form-group">
+                <label>Gender</label>
+                <select
+                  required
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                >
+                  <option value="" disabled>Select gender</option>
+                  {GENDER_OPTIONS.map((g) => (
+                    <option key={g} value={g}>{g}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Relationship Status */}
+              <div className="form-group">
+                <label>Relationship Status</label>
+                <select
+                  required
+                  value={relationshipStatus}
+                  onChange={(e) => setRelationshipStatus(e.target.value)}
+                >
+                  <option value="" disabled>Select status</option>
+                  {RELATIONSHIP_OPTIONS.map((r) => (
+                    <option key={r} value={r}>{r}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Age with increment/decrement */}
+              <div className="form-group">
+                <label>Age</label>
+                <div className="age-spinner">
+                  <button
+                    type="button"
+                    className="spinner-btn"
+                    onMouseDown={() => startAgeChange(-1)}
+                    onMouseUp={stopAgeChange}
+                    onMouseLeave={stopAgeChange}
+                    onTouchStart={() => startAgeChange(-1)}
+                    onTouchEnd={stopAgeChange}
+                  >
+                    −
+                  </button>
+                  <input
+                    type="number"
+                    min="0"
+                    max="120"
+                    value={age}
+                    onChange={(e) => setAge(Math.max(0, Math.min(120, parseInt(e.target.value) || 0)))}
+                    className="age-input"
+                  />
+                  <button
+                    type="button"
+                    className="spinner-btn"
+                    onMouseDown={() => startAgeChange(1)}
+                    onMouseUp={stopAgeChange}
+                    onMouseLeave={stopAgeChange}
+                    onTouchStart={() => startAgeChange(1)}
+                    onTouchEnd={stopAgeChange}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
               <div className="modal-actions">
                 <button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>
                   Cancel

@@ -12,6 +12,28 @@ interface Client {
     createdAt: number;
 }
 
+interface DeletedClient {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    deletedAt: number;
+}
+
+interface Appointment {
+    id: string;
+    clientName: string;
+    dateTime: number;
+    notes?: string;
+}
+
+interface Session {
+    id: string;
+    clientName: string;
+    scheduledDate: number;
+    type: string;
+}
+
 interface UserData {
     email: string;
     name: string;
@@ -160,6 +182,167 @@ function updateStats(): void {
     if (statClients) statClients.textContent = clients.length.toString();
     if (statSessions) statSessions.textContent = (clients.length * 3).toString();
     if (statCompleted) statCompleted.textContent = '0';
+
+    // Render dashboard boxes
+    renderDeletedClients();
+    renderUpcomingAppointments();
+    renderNewSessions();
+}
+
+// ========================================================================
+// DASHBOARD BOXES - DATA & RENDERING
+// ========================================================================
+
+function getDeletedClients(): DeletedClient[] {
+    const stored = localStorage.getItem('therapyDeletedClients');
+    return stored ? JSON.parse(stored) : [];
+}
+
+function saveDeletedClients(clients: DeletedClient[]): void {
+    localStorage.setItem('therapyDeletedClients', JSON.stringify(clients));
+}
+
+function getAppointments(): Appointment[] {
+    const stored = localStorage.getItem('therapyAppointments');
+    return stored ? JSON.parse(stored) : [];
+}
+
+function saveAppointments(appointments: Appointment[]): void {
+    localStorage.setItem('therapyAppointments', JSON.stringify(appointments));
+}
+
+function getSessions(): Session[] {
+    const stored = localStorage.getItem('therapySessions');
+    return stored ? JSON.parse(stored) : [];
+}
+
+function saveSessions(sessions: Session[]): void {
+    localStorage.setItem('therapySessions', JSON.stringify(sessions));
+}
+
+function timeAgo(timestamp: number): string {
+    const now = Date.now();
+    const diff = now - timestamp;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes} min ago`;
+    if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    if (days < 7) return `${days} day${days > 1 ? 's' : ''} ago`;
+    return new Date(timestamp).toLocaleDateString();
+}
+
+function formatDateTime(timestamp: number): string {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    if (date.toDateString() === now.toDateString()) {
+        return `Today at ${timeStr}`;
+    } else if (date.toDateString() === tomorrow.toDateString()) {
+        return `Tomorrow at ${timeStr}`;
+    } else {
+        return `${date.toLocaleDateString([], { month: 'short', day: 'numeric' })} at ${timeStr}`;
+    }
+}
+
+function renderDeletedClients(): void {
+    const container = document.getElementById('deletedClientsList');
+    const countEl = document.getElementById('deletedCount');
+    if (!container) return;
+
+    const deletedClients = getDeletedClients();
+
+    if (countEl) countEl.textContent = `${deletedClients.length} client${deletedClients.length !== 1 ? 's' : ''}`;
+
+    if (deletedClients.length === 0) {
+        container.innerHTML = `<div class="box-empty">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3">
+                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"></path>
+            </svg>
+            <p>No recently deleted clients</p>
+        </div>`;
+        return;
+    }
+
+    // Show most recent first, limit to 5
+    const sorted = [...deletedClients].sort((a, b) => b.deletedAt - a.deletedAt).slice(0, 5);
+    container.innerHTML = sorted.map(client => `
+        <div class="box-item">
+            <p class="box-item-name">${client.firstName} ${client.lastName}</p>
+            <p class="box-item-time">Deleted ${timeAgo(client.deletedAt)}</p>
+        </div>
+    `).join('');
+}
+
+function renderUpcomingAppointments(): void {
+    const container = document.getElementById('upcomingAppointmentsList');
+    const countEl = document.getElementById('appointmentsCount');
+    if (!container) return;
+
+    const appointments = getAppointments();
+    const now = Date.now();
+
+    // Only future appointments, sorted by nearest first
+    const upcoming = appointments
+        .filter(a => a.dateTime > now)
+        .sort((a, b) => a.dateTime - b.dateTime)
+        .slice(0, 5);
+
+    if (countEl) countEl.textContent = `${upcoming.length} appointment${upcoming.length !== 1 ? 's' : ''}`;
+
+    if (upcoming.length === 0) {
+        container.innerHTML = `<div class="box-empty">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <p>No upcoming appointments</p>
+        </div>`;
+        return;
+    }
+
+    container.innerHTML = upcoming.map(appt => `
+        <div class="box-item">
+            <p class="box-item-name">${appt.clientName}</p>
+            <p class="box-item-time">${formatDateTime(appt.dateTime)}</p>
+        </div>
+    `).join('');
+}
+
+function renderNewSessions(): void {
+    const container = document.getElementById('newSessionsList');
+    const countEl = document.getElementById('sessionsCount');
+    if (!container) return;
+
+    const sessions = getSessions();
+
+    if (countEl) countEl.textContent = `${sessions.length} session${sessions.length !== 1 ? 's' : ''}`;
+
+    if (sessions.length === 0) {
+        container.innerHTML = `<div class="box-empty">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <p>No upcoming follow-up sessions</p>
+        </div>`;
+        return;
+    }
+
+    // Most recently created first, limit to 5
+    const sorted = [...sessions].sort((a, b) => b.scheduledDate - a.scheduledDate).slice(0, 5);
+    container.innerHTML = sorted.map(session => `
+        <div class="box-item">
+            <p class="box-item-name">${session.clientName}</p>
+            <p class="box-item-time">${session.type} - ${formatDateTime(session.scheduledDate)}</p>
+        </div>
+    `).join('');
 }
 
 // ========================================================================

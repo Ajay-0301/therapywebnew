@@ -149,28 +149,80 @@
                     </div>
                 </div>
 
-                <div class="content-section">
-                    <h3>Recent Activity</h3>
-                    <div class="activity-list">
-                        <div class="activity-item">
-                            <div class="activity-indicator"></div>
-                            <div class="activity-content">
-                                <p class="activity-title">New client added</p>
-                                <p class="activity-time">2 hours ago</p>
+                <div class="dashboard-boxes-grid">
+                    <!-- Recently Deleted Clients Box -->
+                    <div class="dashboard-box deleted-box">
+                        <div class="box-header">
+                            <div class="box-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                            </div>
+                            <div class="box-header-text">
+                                <h3>Recently Deleted Clients</h3>
+                                <p class="box-count" id="deletedCount">0 clients</p>
                             </div>
                         </div>
-                        <div class="activity-item">
-                            <div class="activity-indicator"></div>
-                            <div class="activity-content">
-                                <p class="activity-title">Session completed</p>
-                                <p class="activity-time">5 hours ago</p>
+                        <div class="box-content" id="deletedClientsList">
+                            <div class="box-empty">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3">
+                                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"></path>
+                                </svg>
+                                <p>No recently deleted clients</p>
                             </div>
                         </div>
-                        <div class="activity-item">
-                            <div class="activity-indicator"></div>
-                            <div class="activity-content">
-                                <p class="activity-title">Progress note added</p>
-                                <p class="activity-time">1 day ago</p>
+                    </div>
+
+                    <!-- Upcoming Appointments Box -->
+                    <div class="dashboard-box appointments-box">
+                        <div class="box-header">
+                            <div class="box-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                            </div>
+                            <div class="box-header-text">
+                                <h3>Upcoming Appointments</h3>
+                                <p class="box-count" id="appointmentsCount">0 appointments</p>
+                            </div>
+                        </div>
+                        <div class="box-content" id="upcomingAppointmentsList">
+                            <div class="box-empty">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                                <p>No upcoming appointments</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Upcoming Follow-up Sessions Box -->
+                    <div class="dashboard-box sessions-box">
+                        <div class="box-header">
+                            <div class="box-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                            </div>
+                            <div class="box-header-text">
+                                <h3>Upcoming Follow-up Sessions</h3>
+                                <p class="box-count" id="sessionsCount">0 sessions</p>
+                            </div>
+                        </div>
+                        <div class="box-content" id="newSessionsList">
+                            <div class="box-empty">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                                <p>No upcoming follow-up sessions</p>
                             </div>
                         </div>
                     </div>

@@ -49,7 +49,9 @@ export function generateClientId(): string {
 export interface Appointment {
     id: string;
     clientName: string;
+    clientAge?: number;
     dateTime: number;
+    duration?: number; // in minutes
     notes?: string;
 }
 

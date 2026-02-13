@@ -17,6 +17,7 @@ export default function Clients() {
   const navigate = useNavigate();
   const [clients, setClients] = useState<Client[]>([]);
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'completed'>('all');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
 
@@ -43,12 +44,18 @@ export default function Clients() {
 
   const filtered = clients.filter((c) => {
     const q = search.toLowerCase();
+    const safeText = (value?: string | null) => (value ?? '').toString().toLowerCase();
+    const statusValue = (c as Client).status || 'active';
+    const statusMatches = statusFilter === 'all' || statusValue === statusFilter;
     return (
-      c.name.toLowerCase().includes(q) ||
-      c.clientId.toLowerCase().includes(q) ||
-      c.email.toLowerCase().includes(q) ||
-      c.phone.toLowerCase().includes(q) ||
-      c.gender.toLowerCase().includes(q)
+      statusMatches &&
+      (
+        safeText(c.name).includes(q) ||
+        safeText(c.clientId).includes(q) ||
+        safeText(c.email).includes(q) ||
+        safeText(c.phone).includes(q) ||
+        safeText(c.gender).includes(q)
+      )
     );
   });
 
@@ -214,7 +221,8 @@ export default function Clients() {
       <div className="page-header">
         <div>
           <h2>Clients</h2>
-          <p className="page-subtitle">Manage your therapy clients</p>
+          <p className="page-subtitle">View, organize, and manage all your client profiles in one secure place.
+                                       Access session history, therapy notes, and progress updates efficiently.</p>
         </div>
         <button className="btn btn-primary" onClick={openAdd}>
           + Add Client
@@ -222,13 +230,48 @@ export default function Clients() {
       </div>
 
       <div className="clients-filters">
-        <input
-          type="text"
-          className="search-input"
-          placeholder="Search by name, ID, email..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+        <div className="search-wrapper">
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search by name, ID, email..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <span className="search-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="7" />
+              <line x1="20" y1="20" x2="16.5" y2="16.5" />
+            </svg>
+          </span>
+        </div>
+
+        <div className="status-tabs" role="tablist" aria-label="Client status">
+          <button
+            className={`status-tab ${statusFilter === 'all' ? 'active' : ''}`}
+            onClick={() => setStatusFilter('all')}
+            role="tab"
+            aria-selected={statusFilter === 'all'}
+          >
+            All
+          </button>
+          <button
+            className={`status-tab ${statusFilter === 'active' ? 'active' : ''}`}
+            onClick={() => setStatusFilter('active')}
+            role="tab"
+            aria-selected={statusFilter === 'active'}
+          >
+            Active
+          </button>
+          <button
+            className={`status-tab ${statusFilter === 'completed' ? 'active' : ''}`}
+            onClick={() => setStatusFilter('completed')}
+            role="tab"
+            aria-selected={statusFilter === 'completed'}
+          >
+            Completed
+          </button>
+        </div>
       </div>
 
       <div className="clients-list">
@@ -241,7 +284,7 @@ export default function Clients() {
             <div key={c.id} className="client-card" onClick={() => navigate(`/clients/${c.id}`)}>
               <div className="client-card-top">
                 <div className="client-avatar">
-                  {c.name.charAt(0).toUpperCase()}
+                  {(c.name || 'U').charAt(0).toUpperCase()}
                 </div>
                 <span className="client-id-badge">{c.clientId}</span>
               </div>

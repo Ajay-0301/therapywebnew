@@ -35,6 +35,9 @@ export default function Dashboard() {
     .sort((a, b) => a.scheduledDate - b.scheduledDate);
 
   const completedCases = deletedClients.length;
+  const completedClients = clients
+    .filter((c) => c.status === 'completed')
+    .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
   return (
     <section className="page active">
@@ -147,11 +150,53 @@ export default function Dashboard() {
               deletedClients.slice(0, 5).map((dc) => (
                 <div key={dc.id} className="box-item">
                   <div className="box-item-icon deleted-accent">
-                    {dc.name.charAt(0).toUpperCase()}
+                    {(dc.name || 'U').charAt(0).toUpperCase()}
                   </div>
                   <div className="box-item-info">
-                    <p className="box-item-name">{dc.name}</p>
+                    <p className="box-item-name">{dc.name || 'Unknown'}</p>
                     <p className="box-item-detail">{timeAgo(dc.deletedAt)}</p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Recently Completed Clients */}
+        <div className="dashboard-box completed-box">
+          <div className="box-header">
+            <div
+              className="box-icon"
+              style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
+            >
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+              </svg>
+            </div>
+            <div className="box-header-text">
+              <h3>Recently Completed Clients</h3>
+              <p className="box-count">{completedClients.length} client{completedClients.length !== 1 ? 's' : ''}</p>
+            </div>
+          </div>
+          <div className="box-content">
+            {completedClients.length === 0 ? (
+              <div className="box-empty">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" opacity={0.3}>
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
+                </svg>
+                <p>No completed clients yet</p>
+              </div>
+            ) : (
+              completedClients.slice(0, 5).map((cc) => (
+                <div key={cc.id} className="box-item">
+                  <div className="box-item-icon completed-accent">
+                    {(cc.name || 'U').charAt(0).toUpperCase()}
+                  </div>
+                  <div className="box-item-info">
+                    <p className="box-item-name">{cc.name || 'Unknown'}</p>
+                    <p className="box-item-detail">{timeAgo(cc.createdAt || Date.now())}</p>
                   </div>
                 </div>
               ))

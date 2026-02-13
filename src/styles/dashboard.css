@@ -78,7 +78,7 @@
 
 .dashboard-boxes-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 28px;
     margin-top: 36px;
     padding-bottom: 40px;
@@ -99,6 +99,7 @@
 }
 
 .dashboard-box.deleted-box { border-top: 4px solid #667eea; }
+.dashboard-box.completed-box { border-top: 4px solid #10b981; }
 .dashboard-box.appointments-box { border-top: 4px solid #f5576c; }
 .dashboard-box.sessions-box { border-top: 4px solid #4facfe; }
 
@@ -109,6 +110,7 @@
 }
 
 .dashboard-box.deleted-box:hover { border-top-color: #5a6fd6; }
+.dashboard-box.completed-box:hover { border-top-color: #059669; }
 .dashboard-box.appointments-box:hover { border-top-color: #e04560; }
 .dashboard-box.sessions-box:hover { border-top-color: #3a9ae8; }
 
@@ -187,6 +189,7 @@
 }
 
 .appointments-box .box-item { border-left-color: #f5576c; }
+.completed-box .box-item { border-left-color: #10b981; }
 .sessions-box .box-item { border-left-color: #4facfe; }
 
 .box-item:hover {
@@ -196,6 +199,7 @@
 }
 
 .appointments-box .box-item:hover { background: #fef2f2; }
+.completed-box .box-item:hover { background: #ecfdf5; }
 .sessions-box .box-item:hover { background: #eff6ff; }
 
 .box-item-name {

@@ -69,49 +69,85 @@ export interface UserData {
 }
 
 // LocalStorage helpers
+function safeGetItem(key: string): string | null {
+    try {
+        return localStorage.getItem(key);
+    } catch (err) {
+        // eslint-disable-next-line no-console
+        console.warn(`localStorage getItem failed for ${key}`, err);
+        return null;
+    }
+}
+
+function safeSetItem(key: string, value: string): void {
+    try {
+        localStorage.setItem(key, value);
+    } catch (err) {
+        // eslint-disable-next-line no-console
+        console.warn(`localStorage setItem failed for ${key}`, err);
+    }
+}
+
+function safeRemoveItem(key: string): void {
+    try {
+        localStorage.removeItem(key);
+    } catch (err) {
+        // eslint-disable-next-line no-console
+        console.warn(`localStorage removeItem failed for ${key}`, err);
+    }
+}
+
+function safeParse<T>(raw: string | null, fallback: T, storageKey: string): T {
+    if (!raw) return fallback;
+    try {
+        return JSON.parse(raw) as T;
+    } catch (err) {
+        // Corrupt storage should not crash the app; clear the bad value.
+        // eslint-disable-next-line no-console
+        console.warn(`Invalid JSON in localStorage for ${storageKey}`, err);
+        safeRemoveItem(storageKey);
+        return fallback;
+    }
+}
+
 export function getClients(): Client[] {
-    const stored = localStorage.getItem('therapyClients');
-    return stored ? JSON.parse(stored) : [];
+    return safeParse<Client[]>(safeGetItem('therapyClients'), [], 'therapyClients');
 }
 
 export function saveClients(clients: Client[]): void {
-    localStorage.setItem('therapyClients', JSON.stringify(clients));
+    safeSetItem('therapyClients', JSON.stringify(clients));
 }
 
 export function getDeletedClients(): DeletedClient[] {
-    const stored = localStorage.getItem('therapyDeletedClients');
-    return stored ? JSON.parse(stored) : [];
+    return safeParse<DeletedClient[]>(safeGetItem('therapyDeletedClients'), [], 'therapyDeletedClients');
 }
 
 export function saveDeletedClients(clients: DeletedClient[]): void {
-    localStorage.setItem('therapyDeletedClients', JSON.stringify(clients));
+    safeSetItem('therapyDeletedClients', JSON.stringify(clients));
 }
 
 export function getAppointments(): Appointment[] {
-    const stored = localStorage.getItem('therapyAppointments');
-    return stored ? JSON.parse(stored) : [];
+    return safeParse<Appointment[]>(safeGetItem('therapyAppointments'), [], 'therapyAppointments');
 }
 
 export function saveAppointments(appointments: Appointment[]): void {
-    localStorage.setItem('therapyAppointments', JSON.stringify(appointments));
+    safeSetItem('therapyAppointments', JSON.stringify(appointments));
 }
 
 export function getSessions(): Session[] {
-    const stored = localStorage.getItem('therapySessions');
-    return stored ? JSON.parse(stored) : [];
+    return safeParse<Session[]>(safeGetItem('therapySessions'), [], 'therapySessions');
 }
 
 export function saveSessions(sessions: Session[]): void {
-    localStorage.setItem('therapySessions', JSON.stringify(sessions));
+    safeSetItem('therapySessions', JSON.stringify(sessions));
 }
 
 export function getUserData(): UserData | null {
-    const stored = localStorage.getItem('userData');
-    return stored ? JSON.parse(stored) : null;
+    return safeParse<UserData | null>(safeGetItem('userData'), null, 'userData');
 }
 
 export function saveUserData(data: UserData): void {
-    localStorage.setItem('userData', JSON.stringify(data));
+    safeSetItem('userData', JSON.stringify(data));
 }
 
 // Formatting helpers

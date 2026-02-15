@@ -1,4 +1,18 @@
 /* ========================================================================
+   LAYOUT & HYDRATION
+   ======================================================================== */
+
+/* Disable transitions during initial page load to prevent visual flicker */
+.dashboard-layout.not-hydrated {
+    transition: none !important;
+}
+
+.dashboard-layout.not-hydrated * {
+    transition: none !important;
+    animation: none !important;
+}
+
+/* ========================================================================
    SIDEBAR
    ======================================================================== */
 

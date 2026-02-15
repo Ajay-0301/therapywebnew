@@ -6,7 +6,8 @@
     display: grid;
     grid-template-columns: 1fr;
     gap: 24px;
-    max-width: 700px;
+    max-width: 1200px;
+    width: 100%;
 }
 
 .settings-section {

@@ -62,6 +62,15 @@ export interface Session {
     type: string;
 }
 
+export interface Earning {
+    id: string;
+    day: number; // 1-31
+    month: number; // 0-11
+    year: number;
+    amount: number;
+    timestamp: number;
+}
+
 export interface UserData {
     email: string;
     name: string;
@@ -144,6 +153,14 @@ export function saveSessions(sessions: Session[]): void {
     safeSetItem('therapySessions', JSON.stringify(sessions));
 }
 
+export function getEarnings(): Earning[] {
+    return safeParse<Earning[]>(safeGetItem('therapyEarnings'), [], 'therapyEarnings');
+}
+
+export function saveEarnings(earnings: Earning[]): void {
+    safeSetItem('therapyEarnings', JSON.stringify(earnings));
+}
+
 export function getUserData(): UserData | null {
     return safeParse<UserData | null>(safeGetItem('userData'), null, 'userData');
 }
@@ -176,4 +193,15 @@ export function formatDateTime(timestamp: number): string {
     if (date.toDateString() === now.toDateString()) return `Today at ${timeStr}`;
     if (date.toDateString() === tomorrow.toDateString()) return `Tomorrow at ${timeStr}`;
     return `${date.toLocaleDateString([], { month: 'short', day: 'numeric' })} at ${timeStr}`;
+}
+
+// Delete functions
+export function deleteDeletedClient(clientId: string): void {
+    const deleted = getDeletedClients();
+    saveDeletedClients(deleted.filter(c => c.id !== clientId));
+}
+
+export function deleteAppointment(appointmentId: string): void {
+    const appointments = getAppointments();
+    saveAppointments(appointments.filter(a => a.id !== appointmentId));
 }

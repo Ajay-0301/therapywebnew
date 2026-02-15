@@ -29,6 +29,7 @@ export default function ClientProfile() {
   // Current session
   const [sessionNotes, setSessionNotes] = useState('');
   const [followUpDate, setFollowUpDate] = useState('');
+  const [followUpTime, setFollowUpTime] = useState('');
   const [followUpNotes, setFollowUpNotes] = useState('');
   // timers for auto-increment when holding buttons
   const ageTimer = useRef<number | null>(null);
@@ -102,18 +103,33 @@ export default function ClientProfile() {
 
   function handleSaveSession() {
     if (!client) return;
+    // Combine date and time if time is provided
+    let fullFollowUpDate = followUpDate;
+    if (followUpDate && followUpTime) {
+      const [hours, minutes] = followUpTime.split(':');
+      const dateObj = new Date(followUpDate);
+      dateObj.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+      fullFollowUpDate = dateObj.toISOString();
+    }
     const record: SessionRecord = {
       id: crypto.randomUUID(),
       date: new Date().toISOString(),
       notes: sessionNotes,
-      followUpDate,
+      followUpDate: fullFollowUpDate,
       followUpNotes,
     };
     const history = [...(client.sessionHistory || []), record];
-    persist({ sessionHistory: history });
+    persist({ sessionHistory: history, chiefComplaints, hopi });
     setSessionNotes('');
     setFollowUpDate('');
+    setFollowUpTime('');
     setFollowUpNotes('');
+  }
+
+  function deleteSessionRecord(recordId: string) {
+    if (!client) return;
+    const history = (client.sessionHistory || []).filter((s) => s.id !== recordId);
+    persist({ sessionHistory: history });
   }
 
   function incrementSession() {
@@ -339,33 +355,6 @@ export default function ClientProfile() {
             Completed
           </button>
         </div>
-
-        {/* Sessions Counter */}
-        <div className="sessions-box">
-          <h4>Sessions</h4>
-          <div className="session-counter">
-            <span className="counter-label">Count: {sessionCount}</span>
-            <button
-              className="counter-btn decrement"
-              onMouseDown={() => startSessionChange(-1)}
-              onMouseUp={stopSessionChange}
-              onMouseLeave={stopSessionChange}
-              onTouchStart={() => startSessionChange(-1)}
-              onTouchEnd={stopSessionChange}
-            >−</button>
-            <button
-              className="counter-btn increment"
-              onMouseDown={() => startSessionChange(1)}
-              onMouseUp={stopSessionChange}
-              onMouseLeave={stopSessionChange}
-              onTouchStart={() => startSessionChange(1)}
-              onTouchEnd={stopSessionChange}
-            >+</button>
-          </div>
-          <p className="sessions-hint">
-            Use + to record a session attended. Click the Next Session date to view only the follow-up date in history.
-          </p>
-        </div>
       </div>
 
       {/* === Chief Complaints === */}
@@ -376,6 +365,7 @@ export default function ClientProfile() {
           placeholder="Enter chief complaints..."
           value={chiefComplaints}
           onChange={(e) => setChiefComplaints(e.target.value)}
+          onBlur={() => persist({ chiefComplaints })}
           rows={5}
         />
       </div>
@@ -388,6 +378,7 @@ export default function ClientProfile() {
           placeholder="Enter history of presenting illness..."
           value={hopi}
           onChange={(e) => setHopi(e.target.value)}
+          onBlur={() => persist({ hopi })}
           rows={6}
         />
       </div>
@@ -416,6 +407,16 @@ export default function ClientProfile() {
             className="date-input"
           />
         </div>
+        <div className="time-input-group">
+          <label>Session Time (Optional)</label>
+          <input
+            type="time"
+            value={followUpTime}
+            onChange={(e) => setFollowUpTime(e.target.value)}
+            className="time-input"
+            placeholder="HH:MM"
+          />
+        </div>
         <textarea
           className="profile-textarea"
           placeholder="Follow-up Notes"
@@ -439,19 +440,71 @@ export default function ClientProfile() {
           <div className="history-list">
             {[...client.sessionHistory].reverse().map((s, i) => (
               <div key={s.id} className="history-item">
-                <div className="history-number">#{client.sessionHistory.length - i}</div>
-                <div className="history-details">
-                  <p className="history-date">
-                    {new Date(s.date).toLocaleDateString([], { year: 'numeric', month: 'long', day: 'numeric' })}
-                  </p>
-                  {s.notes && <p className="history-notes">{s.notes}</p>}
-                  {s.followUpDate && (
-                    <p className="history-followup">
-                      <span>Next session:</span> {new Date(s.followUpDate).toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' })}
-                    </p>
-                  )}
-                  {s.followUpNotes && <p className="history-followup-notes">{s.followUpNotes}</p>}
+                {/* Header row */}
+                <div className="history-header">
+                  <div className="history-header-left">
+                    <div className="history-number">#{client.sessionHistory.length - i}</div>
+                    <div className="history-date-group">
+                      <p className="history-date">
+                        {new Date(s.date).toLocaleDateString([], { year: 'numeric', month: 'long', day: 'numeric' })}
+                      </p>
+                      <p className="history-date-sub">
+                        {new Date(s.date).toLocaleDateString([], { weekday: 'long' })}
+                      </p>
+                    </div>
+                  </div>
+                  <button className="history-delete-btn" onClick={() => deleteSessionRecord(s.id)} title="Delete session record">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                    </svg>
+                  </button>
                 </div>
+
+                {/* Session Notes */}
+                {s.notes && s.notes !== 'Recorded' && (
+                  <div className="history-section history-section--notes">
+                    <div className="history-section-icon">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                      </svg>
+                    </div>
+                    <div className="history-section-content">
+                      <span className="history-section-label">Session Notes</span>
+                      <p className="history-section-text">{s.notes}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Follow-up Section */}
+                {(s.followUpDate || s.followUpNotes) && (
+                  <div className="history-section history-section--followup">
+                    <div className="history-section-icon history-section-icon--followup">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                      </svg>
+                    </div>
+                    <div className="history-section-content">
+                      <span className="history-section-label history-section-label--followup">Follow-up</span>
+                      {s.followUpDate && (
+                        <p className="history-followup-date">
+                          {new Date(s.followUpDate).toLocaleDateString([], { year: 'numeric', month: 'long', day: 'numeric' })}
+                          {new Date(s.followUpDate).getHours() > 0 || new Date(s.followUpDate).getMinutes() > 0 ? (
+                            <span> at {new Date(s.followUpDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          ) : null}
+                        </p>
+                      )}
+                      {s.followUpNotes && (
+                        <p className="history-followup-notes">{s.followUpNotes}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>

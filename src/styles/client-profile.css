@@ -825,3 +825,343 @@
         font-size: 18px;
     }
 }
+
+/* ========================================================================
+   DARK MODE STYLES - COMPREHENSIVE
+   ======================================================================== */
+
+body.dark-mode .profile-header {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 50%, rgba(20, 30, 48, 0.95) 100%);
+    border-color: rgba(102, 126, 234, 0.25);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .profile-header:hover {
+    border-color: rgba(102, 126, 234, 0.35);
+    box-shadow: 0 12px 40px rgba(102, 126, 234, 0.15), 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .profile-header-text h2 {
+    background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 50%, #a5b4fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+body.dark-mode .profile-id-row {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+body.dark-mode .profile-id-label {
+    color: #cbd5e1;
+}
+
+body.dark-mode .profile-id-badge {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.25), rgba(139, 92, 246, 0.15));
+    border-color: rgba(102, 126, 234, 0.4);
+    color: #a5b4fc;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25);
+}
+
+body.dark-mode .btn-back {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(102, 126, 234, 0.2);
+    color: #cbd5e1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .btn-back:hover {
+    background: linear-gradient(135deg, #667eea 0%, #8b5cf6 100%);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+body.dark-mode .profile-card {
+    background: rgba(30, 41, 59, 0.85);
+    border-color: rgba(102, 126, 234, 0.15);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .profile-card:hover {
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15), 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .profile-card-header h3 {
+    color: #f1f5f9;
+}
+
+body.dark-mode .btn-save-info {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+body.dark-mode .btn-save-info:hover {
+    box-shadow: 0 6px 18px rgba(102, 126, 234, 0.4);
+}
+
+body.dark-mode .btn-edit {
+    color: #cbd5e1;
+}
+
+body.dark-mode .btn-edit:hover {
+    background: rgba(102, 126, 234, 0.15);
+    color: #a5b4fc;
+}
+
+body.dark-mode .field-box {
+    background: rgba(30, 41, 59, 0.7);
+    border-color: rgba(102, 126, 234, 0.15);
+}
+
+body.dark-mode .field-label {
+    color: #a5b4fc;
+}
+
+body.dark-mode .field-value {
+    color: #f1f5f9;
+}
+
+body.dark-mode .field-input {
+    background: rgba(51, 65, 85, 0.6);
+    color: #f1f5f9;
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .field-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+body.dark-mode .field-input::placeholder {
+    color: #64748b;
+}
+
+body.dark-mode .field-input.readonly {
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(102, 126, 234, 0.15);
+}
+
+body.dark-mode .field-group label {
+    background: rgba(30, 41, 59, 0.85);
+    color: #a5b4fc;
+}
+
+body.dark-mode .field-group input,
+body.dark-mode .field-group select {
+    background: rgba(51, 65, 85, 0.6);
+    color: #f1f5f9;
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .field-group input:focus,
+body.dark-mode .field-group select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+body.dark-mode .field-group input::placeholder {
+    color: #64748b;
+}
+
+body.dark-mode .field-readonly {
+    background: rgba(30, 41, 59, 0.6) !important;
+    color: #f1f5f9 !important;
+    border-color: rgba(102, 126, 234, 0.15) !important;
+}
+
+body.dark-mode .status-label {
+    color: #f1f5f9;
+}
+
+body.dark-mode .status-btn {
+    background: rgba(51, 65, 85, 0.6);
+    border-color: rgba(102, 126, 234, 0.2);
+    color: #cbd5e1;
+}
+
+body.dark-mode .status-btn:hover {
+    background: rgba(102, 126, 234, 0.15);
+    border-color: #667eea;
+    color: #a5b4fc;
+}
+
+body.dark-mode .status-btn.active {
+    background: #10b981;
+    color: white;
+    border-color: #10b981;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+body.dark-mode .status-btn.active.completed {
+    background: transparent;
+    color: #6ee7b7;
+    border-color: #10b981;
+}
+
+body.dark-mode .sessions-box {
+    background: rgba(30, 41, 59, 0.7);
+    border-color: rgba(102, 126, 234, 0.15);
+}
+
+body.dark-mode .sessions-box h4 {
+    color: #f1f5f9;
+}
+
+body.dark-mode .counter-label {
+    color: #f1f5f9;
+}
+
+body.dark-mode .counter-btn {
+    background: rgba(51, 65, 85, 0.6);
+    border-color: rgba(102, 126, 234, 0.2);
+    color: #f1f5f9;
+}
+
+body.dark-mode .counter-btn:hover {
+    background: rgba(102, 126, 234, 0.15);
+    border-color: #667eea;
+}
+
+body.dark-mode .counter-btn.increment {
+    background: #10b981;
+    color: white;
+    border-color: #10b981;
+}
+
+body.dark-mode .counter-btn.increment:hover {
+    background: #059669;
+}
+
+body.dark-mode .sessions-hint {
+    color: #94a3b8;
+}
+
+body.dark-mode .section-title {
+    color: #a5b4fc;
+}
+
+body.dark-mode .profile-textarea {
+    background: rgba(51, 65, 85, 0.6);
+    color: #f1f5f9;
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .profile-textarea:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+body.dark-mode .profile-textarea::placeholder {
+    color: #64748b;
+}
+
+body.dark-mode .date-input {
+    background: rgba(51, 65, 85, 0.6);
+    color: #f1f5f9;
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .date-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+body.dark-mode .time-input-group label {
+    color: #cbd5e1;
+}
+
+body.dark-mode .time-input {
+    background: rgba(51, 65, 85, 0.6);
+    color: #f1f5f9;
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .time-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+body.dark-mode .btn-save-session {
+    background: #10b981;
+    color: white;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+}
+
+body.dark-mode .btn-save-session:hover {
+    background: #059669;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+}
+
+body.dark-mode .empty-history {
+    color: #cbd5e1;
+}
+
+body.dark-mode .history-item {
+    background: rgba(30, 41, 59, 0.7);
+    border-color: rgba(102, 126, 234, 0.15);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .history-item::before {
+    background: linear-gradient(180deg, #667eea, #764ba2);
+}
+
+body.dark-mode .history-item:hover {
+    border-color: rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15), 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .history-date {
+    color: #f1f5f9;
+}
+
+body.dark-mode .history-date-sub {
+    color: #94a3b8;
+}
+
+body.dark-mode .history-delete-btn {
+    color: #cbd5e1;
+}
+
+body.dark-mode .history-delete-btn:hover {
+    background: rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
+}
+
+body.dark-mode .history-section {
+    background: rgba(51, 65, 85, 0.4);
+    border-color: rgba(102, 126, 234, 0.15);
+}
+
+body.dark-mode .history-section--notes {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .history-section--followup {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+body.dark-mode .history-section-label {
+    color: #a5b4fc;
+}
+
+body.dark-mode .history-section-label--followup {
+    color: #6ee7b7;
+}
+
+body.dark-mode .history-section-text {
+    color: #f1f5f9;
+}
+
+body.dark-mode .history-followup-date {
+    color: #6ee7b7;
+}
+
+body.dark-mode .history-followup-notes {
+    color: #f1f5f9;
+}

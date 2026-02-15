@@ -77,7 +77,29 @@ export interface UserData {
     id?: string;
     registeredAt?: string;
     avatar?: string; // optional base64 data URL or image URL
+    theme?: 'light' | 'dark'; // theme preference
+    notificationsEnabled?: boolean; // email notifications
 }
+
+export interface SiteSettings {
+    themeMode: 'light' | 'dark' | 'system';
+    density: 'compact' | 'comfortable';
+    sidebarBehavior: 'expanded' | 'collapsed';
+    language: 'en' | 'hi' | 'ta' | 'es' | 'fr';
+    timeFormat: '12h' | '24h';
+    accentColor: string;
+    practiceName: string;
+}
+
+export const defaultSiteSettings: SiteSettings = {
+    themeMode: 'system',
+    density: 'comfortable',
+    sidebarBehavior: 'expanded',
+    language: 'en',
+    timeFormat: '12h',
+    accentColor: '#667eea',
+    practiceName: 'Therapy'
+};
 
 // LocalStorage helpers
 function safeGetItem(key: string): string | null {
@@ -169,6 +191,14 @@ export function saveUserData(data: UserData): void {
     safeSetItem('userData', JSON.stringify(data));
 }
 
+export function getSiteSettings(): SiteSettings {
+    return safeParse<SiteSettings>(safeGetItem('siteSettings'), defaultSiteSettings, 'siteSettings');
+}
+
+export function saveSiteSettings(data: SiteSettings): void {
+    safeSetItem('siteSettings', JSON.stringify(data));
+}
+
 // Formatting helpers
 export function timeAgo(timestamp: number): string {
     const diff = Date.now() - timestamp;
@@ -183,16 +213,50 @@ export function timeAgo(timestamp: number): string {
     return new Date(timestamp).toLocaleDateString();
 }
 
-export function formatDateTime(timestamp: number): string {
+export function formatDateTime(timestamp: number, timeFormat: SiteSettings['timeFormat'] = '12h'): string {
     const date = new Date(timestamp);
     const now = new Date();
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    const timeStr = timeFormat === '24h' 
+        ? date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+        : date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
 
     if (date.toDateString() === now.toDateString()) return `Today at ${timeStr}`;
     if (date.toDateString() === tomorrow.toDateString()) return `Tomorrow at ${timeStr}`;
     return `${date.toLocaleDateString([], { month: 'short', day: 'numeric' })} at ${timeStr}`;
+}
+
+// Time format conversion utilities
+export function format24to12(time24: string): string {
+    if (!time24 || !time24.includes(':')) return time24;
+    const [hours, minutes] = time24.split(':');
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${String(displayHour).padStart(2, '0')}:${minutes} ${ampm}`;
+}
+
+export function format12to24(time12: string): string {
+    if (!time12) return time12;
+    const match = time12.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+    if (!match) return time12;
+    
+    let hours = parseInt(match[1], 10);
+    const minutes = match[2];
+    const ampm = match[3]?.toUpperCase();
+    
+    if (ampm === 'PM' && hours !== 12) hours += 12;
+    if (ampm === 'AM' && hours === 12) hours = 0;
+    
+    return `${String(hours).padStart(2, '0')}:${minutes}`;
+}
+
+export function formatTimeDisplay(time24: string, timeFormat: SiteSettings['timeFormat']): string {
+    if (!time24) return time24;
+    if (timeFormat === '24h') return time24;
+    return format24to12(time24);
 }
 
 // Delete functions

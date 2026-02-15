@@ -6,6 +6,7 @@ import {
   getAppointments,
   saveClients,
   saveDeletedClients,
+  getSiteSettings,
   timeAgo,
   formatDateTime,
   deleteDeletedClient,
@@ -13,6 +14,7 @@ import {
   type Client,
   type DeletedClient,
   type Appointment,
+  type SiteSettings,
 } from '../utils/store';
 import '../styles/dashboard.css';
 
@@ -30,11 +32,23 @@ export default function Dashboard() {
   const [deletedClients, setDeletedClients] = useState<DeletedClient[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [timeFormat, setTimeFormat] = useState<SiteSettings['timeFormat']>('12h');
 
   useEffect(() => {
     setClients(getClients());
     setDeletedClients(getDeletedClients());
     setAppointments(getAppointments());
+    
+    const settings = getSiteSettings();
+    setTimeFormat(settings.timeFormat);
+    
+    const handleSettingsChange = () => {
+      const updated = getSiteSettings();
+      setTimeFormat(updated.timeFormat);
+    };
+    
+    window.addEventListener('site-settings-updated', handleSettingsChange);
+    return () => window.removeEventListener('site-settings-updated', handleSettingsChange);
   }, [refreshKey]);
 
   const upcomingAppointments = appointments
@@ -365,7 +379,7 @@ export default function Dashboard() {
                       <p className="box-item-name">
                         {appt.clientName} {client?.age ? `(${client.age})` : ''}
                       </p>
-                      <p className="box-item-detail">{formatDateTime(appt.dateTime)}</p>
+                      <p className="box-item-detail">{formatDateTime(appt.dateTime, timeFormat)}</p>
                       <p className="box-item-detail-secondary">
                         {client?.phone || 'No phone'}
                       </p>
@@ -435,7 +449,7 @@ export default function Dashboard() {
                         {fu.clientName} {client?.age ? `(${client.age})` : ''}
                       </p>
                       <p className="box-item-detail">
-                        {formatDateTime(fu.followUpDate)}
+                        {formatDateTime(fu.followUpDate, timeFormat)}
                         {fu.followUpNotes ? ` · ${fu.followUpNotes}` : ''}
                       </p>
                       <p className="box-item-detail-secondary">

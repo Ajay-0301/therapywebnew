@@ -3,8 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   getClients,
   saveClients,
+  getSiteSettings,
+  formatTimeDisplay,
+  format24to12,
   type Client,
   type SessionRecord,
+  type SiteSettings,
 } from '../utils/store';
 import '../styles/client-profile.css';
 
@@ -14,6 +18,7 @@ export default function ClientProfile() {
 
   const [client, setClient] = useState<Client | null>(null);
   const [editing, setEditing] = useState(false);
+  const [timeFormat, setTimeFormat] = useState<SiteSettings['timeFormat']>('12h');
 
   // Editable profile fields
   const [name, setName] = useState('');
@@ -50,6 +55,17 @@ export default function ClientProfile() {
     setSessionCount(found.sessionCount || 0);
     setChiefComplaints(found.chiefComplaints || '');
     setHopi(found.hopi || '');
+    
+    const settings = getSiteSettings();
+    setTimeFormat(settings.timeFormat);
+    
+    const handleSettingsChange = () => {
+      const updated = getSiteSettings();
+      setTimeFormat(updated.timeFormat);
+    };
+    
+    window.addEventListener('site-settings-updated', handleSettingsChange);
+    
     // ensure UI shows persisted values
     // listen for storage changes in other tabs
     const onStorage = (e: StorageEvent) => {
@@ -69,7 +85,10 @@ export default function ClientProfile() {
       }
     };
     window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('site-settings-updated', handleSettingsChange);
+    };
   }, [id, navigate]);
 
   function persist(updated: Partial<Client>) {
@@ -409,13 +428,20 @@ export default function ClientProfile() {
         </div>
         <div className="time-input-group">
           <label>Session Time (Optional)</label>
-          <input
-            type="time"
-            value={followUpTime}
-            onChange={(e) => setFollowUpTime(e.target.value)}
-            className="time-input"
-            placeholder="HH:MM"
-          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <input
+              type="time"
+              value={followUpTime}
+              onChange={(e) => setFollowUpTime(e.target.value)}
+              className="time-input"
+              placeholder="HH:MM"
+            />
+            {followUpTime && (
+              <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
+                ({formatTimeDisplay(followUpTime, timeFormat)})
+              </span>
+            )}
+          </div>
         </div>
         <textarea
           className="profile-textarea"
@@ -495,7 +521,7 @@ export default function ClientProfile() {
                         <p className="history-followup-date">
                           {new Date(s.followUpDate).toLocaleDateString([], { year: 'numeric', month: 'long', day: 'numeric' })}
                           {new Date(s.followUpDate).getHours() > 0 || new Date(s.followUpDate).getMinutes() > 0 ? (
-                            <span> at {new Date(s.followUpDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                            <span> at {new Date(s.followUpDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: timeFormat === '12h' })}</span>
                           ) : null}
                         </p>
                       )}

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Dispatch, SetStateAction } from 'react';
-import { getUserData, saveUserData, type UserData } from '../utils/store';
+import { getUserData, saveUserData, getSiteSettings, type UserData } from '../utils/store';
 import '../styles/layout.css';
 
 const navItems = [
@@ -17,22 +17,43 @@ export default function Sidebar({ collapsed, setCollapsed }: { collapsed: boolea
   const navigate = useNavigate();
   const [userData, setUserData] = useState<UserData | null>(() => getUserData());
   const [editing, setEditing] = useState(false);
-  const [draftName, setDraftName] = useState(() => userData?.name || 'Demo User');
+  const [draftName, setDraftName] = useState(() => userData?.name || '');
+  const [practiceName, setPracticeName] = useState(() => {
+    try {
+      const settings = getSiteSettings();
+      return settings.practiceName;
+    } catch {
+      return '';
+    }
+  });
   const inputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    setDraftName(userData?.name || 'Demo User');
+    setDraftName(userData?.name || '');
   }, [userData?.name]);
 
-  const displayNameForInitials = editing ? draftName : (userData?.name || draftName || 'Demo User');
+  const displayNameForInitials = editing ? draftName : (userData?.name || draftName || '');
 
   useEffect(() => {
     function onStorage(e: StorageEvent) {
       if (e.key === 'userData') setUserData(getUserData());
+      if (e.key === 'siteSettings') {
+        const settings = getSiteSettings();
+        setPracticeName(settings.practiceName);
+      }
     }
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
+  useEffect(() => {
+    function handleSettingsUpdated() {
+      const settings = getSiteSettings();
+      setPracticeName(settings.practiceName);
+    }
+    window.addEventListener('site-settings-updated', handleSettingsUpdated);
+    return () => window.removeEventListener('site-settings-updated', handleSettingsUpdated);
   }, []);
 
   function onAvatarClick() {
@@ -79,7 +100,7 @@ export default function Sidebar({ collapsed, setCollapsed }: { collapsed: boolea
     if (!f) return;
     try {
       const resized = await resizeImageToDataUrl(f, 512, 0.8);
-      const newData: UserData = { ...(userData || { name: 'Demo User', email: '' }), avatar: resized, name: userData?.name || 'Demo User', email: userData?.email || '' };
+      const newData: UserData = { ...(userData || { name: '', email: '' }), avatar: resized, name: (userData?.name || draftName || '').trim(), email: userData?.email || '' };
       saveUserData(newData);
       setUserData(newData);
     } catch (err) {
@@ -98,7 +119,7 @@ export default function Sidebar({ collapsed, setCollapsed }: { collapsed: boolea
   }
 
   function handleSaveName() {
-    const newData: UserData = { ...(userData || { name: 'Demo User', email: '' }), name: draftName, email: userData?.email || '' };
+    const newData: UserData = { ...(userData || { name: '', email: '' }), name: draftName.trim(), email: userData?.email || '' };
     saveUserData(newData);
     setUserData(newData);
     setEditing(false);
@@ -115,7 +136,7 @@ export default function Sidebar({ collapsed, setCollapsed }: { collapsed: boolea
       <div className="sidebar-header">
         <div className="logo">
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M16 3C9.372 3 4 8.372 4 15c0 4.418 2.389 8.277 5.935 10.348.39.228.665.602.665 1.052v2.6h10.8v-2.6c0-.45.275-.824.665-1.052C25.611 23.277 28 19.418 28 15c0-6.628-5.372-12-12-12z" fill="url(#grad)" /><circle cx="16" cy="14" r="3" fill="white" opacity="0.9" /><path d="M12 18c0-2.209 1.791-4 4-4s4 1.791 4 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.9" /><defs><linearGradient id="grad" x1="4" y1="3" x2="28" y2="29"><stop offset="0%" stopColor="#667eea"/><stop offset="100%" stopColor="#764ba2"/></linearGradient></defs></svg>
-          <h1>TherapyNotes</h1>
+          <h1>{practiceName === 'Therapy' ? 'Therapy Notes' : `${practiceName}'s therapy notes`}</h1>
         </div>
         <button className={`sidebar-toggle ${collapsed ? 'collapsed' : ''}`} onClick={() => setCollapsed((c) => !c)} title={collapsed ? 'Open sidebar' : 'Close sidebar'}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -138,7 +159,7 @@ export default function Sidebar({ collapsed, setCollapsed }: { collapsed: boolea
                 </svg>
               </button>
 
-              <button className="avatar-action-btn avatar-action-cancel" title="Cancel" onClick={() => { setDraftName(userData?.name || 'Demo User'); setEditing(false); }} aria-label="Cancel edit">
+              <button className="avatar-action-btn avatar-action-cancel" title="Cancel" onClick={() => { setDraftName(userData?.name || ''); setEditing(false); }} aria-label="Cancel edit">
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                   <path d="M6 6l12 12" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M18 6L6 18" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
@@ -188,7 +209,7 @@ export default function Sidebar({ collapsed, setCollapsed }: { collapsed: boolea
                   <button className="cancel-btn" title="Cancel" onClick={() => { setDraftName(userData?.name || 'Demo User'); setEditing(false); }}>✕</button>
                 </div>
               ) : (
-                <h3 style={{ margin: 0 }}>{userData?.name || 'Demo User'}</h3>
+                <h3 style={{ margin: 0 }}>{userData?.name || '(No name set)'}</h3>
               )}
 
               <button className="edit-btn" title="Edit name" onClick={() => { setEditing(true); setTimeout(() => inputRef.current?.focus(), 50); }}>

@@ -2,6 +2,14 @@
 // THERAPY NOTES - AUTHENTICATION SCRIPT (TypeScript)
 // ========================================
 
+// Configuration constants
+const DEMO_ACCOUNT_EMAIL = 'demo@therapy.com';
+const DEMO_ACCOUNT_PASSWORD = 'Demo@12345';
+const DEMO_ACCOUNT_NAME = 'Dr. Demo Therapist';
+const MIN_PASSWORD_LENGTH = 8;
+const MIN_NAME_LENGTH = 2;
+const MIN_ID_LENGTH = 3;
+
 // Type definitions
 interface UserData {
     email: string;
@@ -114,15 +122,15 @@ const validateEmail = (email: string): boolean => {
 };
 
 const validatePassword = (password: string): boolean => {
-    return password.length >= 8;
+    return password.length >= MIN_PASSWORD_LENGTH;
 };
 
 const validateName = (name: string): boolean => {
-    return name.trim().length >= 2;
+    return name.trim().length >= MIN_NAME_LENGTH;
 };
 
 const validateID = (id: string): boolean => {
-    return id.trim().length >= 3;
+    return id.trim().length >= MIN_ID_LENGTH;
 };
 
 const showError = (input: HTMLInputElement, errorElement: HTMLElement, message: string): void => {
@@ -178,7 +186,7 @@ loginForm.addEventListener('submit', (e: SubmitEvent): void => {
         showError(password, passwordError, 'Password is required');
         isValid = false;
     } else if (!validatePassword(password.value)) {
-        showError(password, passwordError, 'Password must be at least 8 characters');
+        showError(password, passwordError, `Password must be at least ${MIN_PASSWORD_LENGTH} characters`);
         isValid = false;
     } else {
         clearError(password, passwordError);
@@ -186,12 +194,12 @@ loginForm.addEventListener('submit', (e: SubmitEvent): void => {
     
     if (isValid) {
         // Check if it's demo login
-        const isDemoLogin: boolean = email.value === 'demo@therapy.com' && password.value === 'Demo@12345';
+        const isDemoLogin: boolean = email.value === DEMO_ACCOUNT_EMAIL && password.value === DEMO_ACCOUNT_PASSWORD;
         
         // Save user data to localStorage
         const userData: UserData = {
             email: email.value,
-            name: isDemoLogin ? 'Dr. Demo Therapist' : 'Dr. ' + email.value.split('@')[0],
+            name: isDemoLogin ? DEMO_ACCOUNT_NAME : 'Dr. ' + email.value.split('@')[0],
             registeredAt: new Date().toISOString()
         };
         
@@ -267,7 +275,7 @@ registerForm.addEventListener('submit', (e: SubmitEvent): void => {
         showError(password, passwordError, 'Password is required');
         isValid = false;
     } else if (!validatePassword(password.value)) {
-        showError(password, passwordError, 'Password must be at least 8 characters');
+        showError(password, passwordError, `Password must be at least ${MIN_PASSWORD_LENGTH} characters`);
         isValid = false;
     } else {
         clearError(password, passwordError);

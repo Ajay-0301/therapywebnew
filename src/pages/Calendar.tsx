@@ -4,8 +4,11 @@ import {
   getAppointments,
   saveAppointments,
   getClients,
+  getSiteSettings,
+  formatTimeDisplay,
   type Appointment,
   type Client,
+  type SiteSettings,
 } from '../utils/store';
 import '../styles/calendar.css';
 
@@ -20,6 +23,11 @@ const APPOINTMENT_COLOR = { bg: 'rgba(245, 158, 11, 0.2)', border: '#f59e0b', te
 // Light blue color for follow-up sessions
 const FOLLOWUP_COLOR = { bg: 'rgba(79, 172, 254, 0.18)', border: '#4facfe', text: '#2563eb' };
 
+// Default form configuration
+const DEFAULT_APPOINTMENT_TIME = '10:00';
+const DEFAULT_APPOINTMENT_DURATION = '60';
+const DEFAULT_FOLLOWUP_HOUR = 10;
+
 // Unified calendar event type
 interface CalendarEvent {
   id: string;
@@ -32,8 +40,9 @@ interface CalendarEvent {
   followUpNotes?: string;
 }
 
-function formatTime(date: Date): string {
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+function formatTime(date: Date, timeFormat: SiteSettings['timeFormat'] = '12h'): string {
+  const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: timeFormat === '12h' });
+  return timeStr;
 }
 
 function isSameDay(d1: Date, d2: Date): boolean {
@@ -48,19 +57,30 @@ export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+  const [timeFormat, setTimeFormat] = useState<SiteSettings['timeFormat']>('12h');
   const navigate = useNavigate();
 
   // Form state
   const [formName, setFormName] = useState('');
   const [formAge, setFormAge] = useState('');
   const [formDate, setFormDate] = useState('');
-  const [formTime, setFormTime] = useState('10:00');
-  const [formDuration, setFormDuration] = useState('60');
+  const [formTime, setFormTime] = useState(DEFAULT_APPOINTMENT_TIME);
+  const [formDuration, setFormDuration] = useState(DEFAULT_APPOINTMENT_DURATION);
   const [formError, setFormError] = useState('');
 
   useEffect(() => {
     setAppointments(getAppointments());
     setClients(getClients());
+    const settings = getSiteSettings();
+    setTimeFormat(settings.timeFormat);
+    
+    const handleSettingsChange = () => {
+      const updated = getSiteSettings();
+      setTimeFormat(updated.timeFormat);
+    };
+    
+    window.addEventListener('site-settings-updated', handleSettingsChange);
+    return () => window.removeEventListener('site-settings-updated', handleSettingsChange);
   }, []);
 
   // Build follow-up events from client session histories
@@ -70,7 +90,7 @@ export default function Calendar() {
       (client.sessionHistory || []).forEach((s) => {
         if (s.followUpDate) {
           const fuDate = new Date(s.followUpDate);
-          fuDate.setHours(10, 0, 0, 0); // default to 10 AM
+          fuDate.setHours(DEFAULT_FOLLOWUP_HOUR, 0, 0, 0);
           events.push({
             id: `fu-${s.id}`,
             clientName: client.name,
@@ -319,7 +339,7 @@ export default function Calendar() {
                             color: color.text,
                           }}
                         >
-                          <span className="event-time">{formatTime(new Date(evt.dateTime))}</span>
+                          <span className="event-time">{formatTime(new Date(evt.dateTime), timeFormat)}</span>
                           <span className="event-name">{evt.type === 'followup' ? '↻ ' : ''}{evt.clientName}</span>
                         </div>
                       );
@@ -396,7 +416,7 @@ export default function Calendar() {
                               <circle cx="12" cy="12" r="10" />
                               <polyline points="12 6 12 12 16 14" />
                             </svg>
-                            {formatTime(startTime)} – {formatTime(endTime)}
+                            {formatTime(startTime, timeFormat)} – {formatTime(endTime, timeFormat)}
                             <span className="cal-sidebar-item-duration">{evt.duration || 60} min</span>
                           </div>
                         )}
@@ -452,7 +472,7 @@ export default function Calendar() {
                               <circle cx="12" cy="12" r="10" />
                               <polyline points="12 6 12 12 16 14" />
                             </svg>
-                            {formatTime(startTime)} – {formatTime(endTime)}
+                            {formatTime(startTime, timeFormat)} – {formatTime(endTime, timeFormat)}
                             <span className="cal-sidebar-item-duration">{evt.duration || 60} min</span>
                           </div>
                         )}
@@ -522,11 +542,18 @@ export default function Calendar() {
                 </div>
                 <div className="cal-form-group">
                   <label>Appointment Time <span className="required">*</span></label>
-                  <input
-                    type="time"
-                    value={formTime}
-                    onChange={(e) => { setFormTime(e.target.value); setFormError(''); }}
-                  />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <input
+                      type="time"
+                      value={formTime}
+                      onChange={(e) => { setFormTime(e.target.value); setFormError(''); }}
+                    />
+                    {formTime && (
+                      <span style={{ fontSize: '14px', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+                        → {formatTimeDisplay(formTime, timeFormat)}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 

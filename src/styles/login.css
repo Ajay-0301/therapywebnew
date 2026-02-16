@@ -281,14 +281,135 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+/* ========================================================================
+   RESPONSIVE BREAKPOINTS
+   ======================================================================== */
+
+/* Extra Large Screens (> 1440px) */
+@media (min-width: 1441px) {
+    .container {
+        max-width: 800px;
+        min-height: 520px;
+    }
+}
+
+/* Tablet (481px - 768px) */
+@media (max-width: 768px) and (min-width: 481px) {
     .container {
         grid-template-columns: 1fr;
-        max-width: 500px;
+        max-width: 100%;
+        min-height: auto;
     }
-    .left-section { display: none; }
-    .right-section { padding: 40px 30px; }
+    .left-section {
+        display: none;
+    }
+    .right-section {
+        padding: 35px 30px;
+    }
+    .form-wrapper h2 {
+        font-size: 1.6em;
+    }
+    .auth-form {
+        gap: 14px;
+    }
 }
+
+/* Mobile (361px - 480px) */
+@media (max-width: 480px) and (min-width: 361px) {
+    .container {
+        grid-template-columns: 1fr;
+        max-width: 100%;
+        min-height: auto;
+        border-radius: 16px;
+    }
+    .left-section {
+        display: none;
+    }
+    .right-section {
+        padding: 30px 20px;
+        background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+    }
+    .form-wrapper h2 {
+        font-size: 1.5em;
+        margin-bottom: 6px;
+    }
+    .form-subtitle {
+        margin-bottom: 20px;
+        font-size: 0.95em;
+    }
+    .auth-form {
+        gap: 12px;
+    }
+    .form-group {
+        gap: 4px;
+    }
+    .form-group label {
+        font-size: 12px;
+    }
+    .form-group input {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+    .demo-section {
+        padding: 12px;
+        margin-top: 12px;
+        font-size: 0.9em;
+    }
+}
+
+/* Extra Small Mobile (< 360px) */
+@media (max-width: 359px) {
+    .auth-page {
+        padding: 10px;
+    }
+    .container {
+        grid-template-columns: 1fr;
+        max-width: 100%;
+        min-height: auto;
+        border-radius: 12px;
+    }
+    .left-section {
+        display: none;
+    }
+    .right-section {
+        padding: 20px 16px;
+    }
+    .form-wrapper {
+        max-width: 100%;
+    }
+    .form-wrapper h2 {
+        font-size: 1.3em;
+        margin-bottom: 4px;
+    }
+    .form-subtitle {
+        margin-bottom: 16px;
+        font-size: 0.9em;
+    }
+    .auth-form {
+        gap: 10px;
+    }
+    .form-group {
+        gap: 3px;
+    }
+    .form-group label {
+        font-size: 11px;
+    }
+    .form-group input {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+    .btn {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+    .demo-section {
+        padding: 10px;
+        margin-top: 10px;
+        font-size: 0.85em;
+    }
+}
+
+/* Original Mobile Breakpoint - Keep for compatibility */
 
 /* ========================================================================
    DARK MODE STYLES - COMPREHENSIVE

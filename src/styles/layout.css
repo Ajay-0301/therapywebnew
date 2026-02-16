@@ -435,6 +435,22 @@
    RESPONSIVE
    ======================================================================== */
 
+/* Extra Large Screens (> 1440px) */
+@media (min-width: 1441px) {
+    .main-content {
+        padding: 48px;
+    }
+    .page-header {
+        padding: 48px;
+    }
+}
+
+/* Desktop (1025px - 1440px) */
+@media (min-width: 1025px) {
+    .mobile-menu-toggle { top: 26px; }
+}
+
+/* Large Tablet/Small Desktop (769px - 1024px) */
 @media (max-width: 1024px) {
     .sidebar {
         transform: translateX(-280px);
@@ -458,9 +474,64 @@
     }
 }
 
-/* ensure mobile toggle sits visually near header when open */
-@media (min-width: 1025px) {
-    .mobile-menu-toggle { top: 26px; }
+/* Tablet (481px - 768px) */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 16px;
+    }
+    .page-header {
+        padding: 20px 16px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .page-header h2 {
+        font-size: 22px;
+    }
+    .page-header .btn {
+        width: 100%;
+    }
+}
+
+/* Mobile (361px - 480px) */
+@media (max-width: 480px) {
+    .main-content {
+        padding: 12px;
+    }
+    .sidebar {
+        width: 280px;
+    }
+    .page-header {
+        padding: 16px 12px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .page-header h2 {
+        font-size: 18px;
+    }
+    .page-header-icon {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* Extra Small Mobile (< 360px) */
+@media (max-width: 359px) {
+    .main-content {
+        padding: 8px;
+    }
+    .page-header {
+        padding: 12px 8px;
+        gap: 8px;
+    }
+    .page-header h2 {
+        font-size: 16px;
+    }
+    .page-header-icon {
+        width: 36px;
+        height: 36px;
+    }
 }
 /* ========================================================================
    DARK MODE STYLES
@@ -530,4 +601,110 @@ body.dark-mode .logout-btn:hover {
 
 body.dark-mode .main-content {
     background: transparent;
+}
+
+/* ========================================================================
+   RESPONSIVE STYLES FOR MOBILE & TABLET
+   ======================================================================== */
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 240px;
+    }
+    
+    .logo h1 {
+        font-size: 20px;
+    }
+    
+    .user-info {
+        padding: 16px 14px;
+    }
+    
+    .user-avatar {
+        width: 48px;
+        height: 48px;
+        font-size: 18px;
+    }
+    
+    .nav-item {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+    
+    .nav-item svg {
+        width: 16px;
+        height: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .sidebar {
+        width: 240px;
+        transform: translateX(-280px);
+        transition: transform 0.3s ease;
+    }
+    
+    .sidebar.collapsed {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0 !important;
+        padding: 16px;
+    }
+    
+    .logo h1 {
+        font-size: 18px;
+        margin-bottom: 8px;
+    }
+    
+    .user-info {
+        padding: 12px 12px;
+        margin-bottom: 16px;
+    }
+    
+    .user-avatar {
+        width: 44px;
+        height: 44px;
+        font-size: 16px;
+    }
+    
+    .user-details h3 {
+        font-size: 12px;
+    }
+    
+    .user-details p {
+        font-size: 10px;
+    }
+    
+    .edit-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+    
+    .nav-item {
+        padding: 8px 10px;
+        font-size: 12px;
+        margin: 4px 0;
+    }
+    
+    .nav-item svg {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .logout-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+        margin-top: 12px;
+    }
+    
+    .mobile-menu-toggle {
+        width: 40px;
+        height: 40px;
+        left: 16px;
+        top: 20px;
+        font-size: 18px;
+    }
 }

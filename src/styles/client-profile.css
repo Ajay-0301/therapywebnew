@@ -215,9 +215,80 @@
     margin-bottom: 24px;
 }
 
+/* ========================================================================
+   Tablet (481px - 768px)
+   ======================================================================== */
 @media (max-width: 768px) {
     .field-box-grid {
         grid-template-columns: 1fr;
+    }
+    .profile-header {
+        padding: 20px 16px;
+    }
+    .profile-card {
+        padding: 18px;
+    }
+    .session-controls {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
+
+/* ========================================================================
+   Mobile (361px - 480px)
+   ======================================================================== */
+@media (max-width: 480px) {
+    .profile-header {
+        padding: 16px 12px;
+        gap: 12px;
+    }
+    .profile-header-text h2 {
+        font-size: 20px;
+    }
+    .profile-header-text p {
+        font-size: 12px;
+    }
+    .profile-card {
+        padding: 16px 14px;
+        margin-bottom: 12px;
+    }
+    .profile-card h3 {
+        font-size: 16px;
+        margin-bottom: 12px;
+    }
+    .field-box {
+        padding: 12px;
+    }
+    .field-label {
+        font-size: 11px;
+    }
+    .profile-textarea {
+        padding: 10px;
+        font-size: 13px;
+    }
+}
+
+/* ========================================================================
+   Extra Small Mobile (< 360px)
+   ======================================================================== */
+@media (max-width: 359px) {
+    .profile-header {
+        padding: 12px 10px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .profile-header-text h2 {
+        font-size: 18px;
+    }
+    .profile-card {
+        padding: 12px 10px;
+        margin-bottom: 10px;
+    }
+    .profile-card h3 {
+        font-size: 14px;
+    }
+    .field-box {
+        padding: 10px;
     }
 }
 

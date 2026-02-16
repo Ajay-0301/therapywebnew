@@ -37,7 +37,6 @@ export default function Login() {
     // Register state
     const [regName, setRegName] = useState('');
     const [regEmail, setRegEmail] = useState('');
-    const [regId, setRegId] = useState('');
     const [regPassword, setRegPassword] = useState('');
     const [regConfirm, setRegConfirm] = useState('');
     const [showRegPass, setShowRegPass] = useState(false);
@@ -78,7 +77,7 @@ export default function Login() {
         e.preventDefault();
         setError('');
 
-        if (!regName || !regEmail || !regId || !regPassword || !regConfirm) {
+        if (!regName || !regEmail || !regPassword || !regConfirm) {
             setError('Please fill in all fields');
             return;
         }
@@ -91,7 +90,7 @@ export default function Login() {
             return;
         }
 
-        const userData = { email: regEmail, name: regName, id: regId, registeredAt: new Date().toISOString() };
+        const userData = { email: regEmail, name: regName, registeredAt: new Date().toISOString() };
         saveUserData(userData);
         navigate('/dashboard');
     };
@@ -188,10 +187,6 @@ export default function Login() {
                                 <div className="form-group">
                                     <label>Email Address</label>
                                     <input type="email" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} placeholder="you@example.com" required />
-                                </div>
-                                <div className="form-group">
-                                    <label>Professional ID</label>
-                                    <input type="text" value={regId} onChange={(e) => setRegId(e.target.value)} placeholder="License/ID Number" required />
                                 </div>
                                 <div className="form-group">
                                     <label>Password</label>

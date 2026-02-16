@@ -975,3 +975,138 @@ body.dark-mode .empty-state-text {
 body.dark-mode .empty-state-subtext {
     color: #94a3b8;
 }
+
+/* ========================================================================
+   RESPONSIVE STYLES FOR MOBILE & TABLET
+   ======================================================================== */
+
+@media (max-width: 768px) {
+    .clients-filters {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .search-wrapper {
+        max-width: 100%;
+    }
+
+    .status-tabs {
+        flex-wrap: wrap;
+    }
+
+    .client-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .clients-filters {
+        padding: 0;
+        gap: 10px;
+    }
+
+    .search-wrapper {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .search-input {
+        padding: 10px 36px 10px 14px;
+        font-size: 12px;
+    }
+
+    .search-icon svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .status-tabs {
+        flex-wrap: wrap;
+        gap: 4px;
+        width: 100%;
+    }
+
+    .tab-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+        flex: 1;
+        min-width: 100px;
+    }
+
+    .client-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .client-card {
+        padding: 14px;
+    }
+
+    .client-header {
+        gap: 10px;
+    }
+
+    .client-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+    }
+
+    .client-info h3 {
+        font-size: 14px;
+    }
+
+    .client-info p {
+        font-size: 11px;
+    }
+
+    .client-menu {
+        width: 28px;
+        height: 28px;
+        font-size: 16px;
+    }
+
+    .btn {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .modal {
+        width: 90vw;
+        max-width: 100%;
+        max-height: 90vh;
+    }
+
+    .modal-content {
+        padding: 16px;
+    }
+
+    .modal-header {
+        padding: 12px 0;
+    }
+
+    .modal-title {
+        font-size: 16px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .form-group {
+        gap: 4px;
+    }
+
+    .form-group label {
+        font-size: 12px;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+}

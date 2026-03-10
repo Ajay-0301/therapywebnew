@@ -6,7 +6,7 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "jsx": "react-jsx",
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": "./frontend",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -27,6 +27,6 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src/**/*"],
+  "include": ["frontend/**/*"],
   "exclude": ["node_modules", "dist"]
 }

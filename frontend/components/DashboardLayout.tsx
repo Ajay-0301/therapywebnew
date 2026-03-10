@@ -42,7 +42,7 @@ export default function DashboardLayout() {
                 <div className={`mobile-menu-toggle ${collapsed ? 'is-collapsed' : ''}`}>
                     <button
                         className={`hamburger-menu ${collapsed ? 'is-collapsed' : ''}`}
-                        onClick={() => setCollapsed((c) => !c)}
+                        onClick={() => setCollapsed((c: boolean) => !c)}
                         aria-expanded={collapsed}
                         title={collapsed ? 'Open sidebar' : 'Close sidebar'}
                     >

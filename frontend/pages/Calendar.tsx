@@ -8,6 +8,7 @@ import {
   formatTimeDisplay,
   type Appointment,
   type Client,
+  type SessionRecord,
   type SiteSettings,
 } from '../utils/store';
 import '../styles/calendar.css';
@@ -86,8 +87,8 @@ export default function Calendar() {
   // Build follow-up events from client session histories
   const followUpEvents = useMemo<CalendarEvent[]>(() => {
     const events: CalendarEvent[] = [];
-    clients.forEach((client) => {
-      (client.sessionHistory || []).forEach((s) => {
+    clients.forEach((client: Client) => {
+      (client.sessionHistory || []).forEach((s: SessionRecord) => {
         if (s.followUpDate) {
           const fuDate = new Date(s.followUpDate);
           fuDate.setHours(DEFAULT_FOLLOWUP_HOUR, 0, 0, 0);
@@ -147,7 +148,7 @@ export default function Calendar() {
   // Map all events to dates
   const eventsByDate = useMemo(() => {
     const map = new Map<string, CalendarEvent[]>();
-    allEvents.forEach((evt) => {
+    allEvents.forEach((evt: CalendarEvent) => {
       const d = new Date(evt.dateTime);
       const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
       if (!map.has(key)) map.set(key, []);
@@ -239,11 +240,11 @@ export default function Calendar() {
 
   const today = new Date();
   const todayEvents = allEvents
-    .filter((e) => isSameDay(new Date(e.dateTime), today))
-    .sort((a, b) => a.dateTime - b.dateTime);
+    .filter((e: CalendarEvent) => isSameDay(new Date(e.dateTime), today))
+    .sort((a: CalendarEvent, b: CalendarEvent) => a.dateTime - b.dateTime);
 
   // Client name suggestions
-  const clientNames = clients.map((c) => c.name);
+  const clientNames = clients.map((c: Client) => c.name);
 
   // Selected day events for the detail panel
   const selectedDayKey = selectedDay
@@ -307,7 +308,7 @@ export default function Calendar() {
               <div key={day} className="calendar-weekday">{day}</div>
             ))}
             {/* Day cells */}
-            {calendarDays.map((day, idx) => {
+            {calendarDays.map((day: any, idx: number) => {
               if (!day) return <div key={`pad-${idx}`} className="calendar-day empty" />;
 
               const dateKey = `${day.getFullYear()}-${day.getMonth()}-${day.getDate()}`;
@@ -327,7 +328,7 @@ export default function Calendar() {
                 >
                   <span className="day-number">{day.getDate()}</span>
                   <div className="day-events">
-                    {dayEvts.slice(0, 3).map((evt) => {
+                    {dayEvts.slice(0, 3).map((evt: CalendarEvent) => {
                       const color = getEventColor(evt);
                       return (
                         <div
@@ -384,7 +385,7 @@ export default function Calendar() {
                 </div>
               ) : (
                 <div className="cal-sidebar-list">
-                  {selectedDayEvents.map((evt) => {
+                  {selectedDayEvents.map((evt: CalendarEvent) => {
                     const color = getEventColor(evt);
                     const startTime = new Date(evt.dateTime);
                     const endTime = new Date(evt.dateTime + (evt.duration || 60) * 60000);
@@ -447,7 +448,7 @@ export default function Calendar() {
                 </div>
               ) : (
                 <div className="cal-sidebar-list">
-                  {todayEvents.map((evt) => {
+                  {todayEvents.map((evt: CalendarEvent) => {
                     const color = getEventColor(evt);
                     const startTime = new Date(evt.dateTime);
                     const endTime = new Date(evt.dateTime + (evt.duration || 60) * 60000);
@@ -513,7 +514,7 @@ export default function Calendar() {
                   autoFocus
                 />
                 <datalist id="client-suggestions">
-                  {clientNames.map((n) => (
+                  {clientNames.map((n: string) => (
                     <option key={n} value={n} />
                   ))}
                 </datalist>

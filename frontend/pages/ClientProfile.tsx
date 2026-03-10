@@ -42,7 +42,7 @@ export default function ClientProfile() {
 
   useEffect(() => {
     const clients = getClients();
-    const found = clients.find((c) => c.id === id);
+    const found = clients.find((c: Client) => c.id === id);
     if (!found) {
       navigate('/clients');
       return;
@@ -71,7 +71,7 @@ export default function ClientProfile() {
     const onStorage = (e: StorageEvent) => {
       if (e.key === 'therapyClients') {
         const clients = getClients();
-        const f = clients.find((c) => c.id === id);
+        const f = clients.find((c: Client) => c.id === id);
         if (f) {
           setClient(f);
           setName(f.name);
@@ -94,7 +94,7 @@ export default function ClientProfile() {
   function persist(updated: Partial<Client>) {
     if (!client) return;
     const clients = getClients();
-    const idx = clients.findIndex((c) => c.id === client.id);
+    const idx = clients.findIndex((c: Client) => c.id === client.id);
     if (idx === -1) return;
     const merged = { ...clients[idx], ...updated };
     clients[idx] = merged;
@@ -147,7 +147,7 @@ export default function ClientProfile() {
 
   function deleteSessionRecord(recordId: string) {
     if (!client) return;
-    const history = (client.sessionHistory || []).filter((s) => s.id !== recordId);
+    const history = (client.sessionHistory || []).filter((s: SessionRecord) => s.id !== recordId);
     persist({ sessionHistory: history });
   }
 
@@ -170,7 +170,7 @@ export default function ClientProfile() {
     // then start repeating
     stopAgeChange();
     ageTimer.current = window.setInterval(() => {
-      setAge((a) => Math.max(0, a + delta));
+      setAge((a: number) => Math.max(0, a + delta));
     }, 150);
   }
 
@@ -192,7 +192,7 @@ export default function ClientProfile() {
     });
     stopSessionChange();
     sessionTimer.current = window.setInterval(() => {
-      setSessionCount((s) => {
+      setSessionCount((s: number) => {
         const next = Math.max(0, s + delta);
         // also append a minimal history record so history reflects count
         if (client) {

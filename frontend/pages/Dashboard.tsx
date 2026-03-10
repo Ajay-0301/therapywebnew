@@ -13,6 +13,7 @@ import {
   deleteAppointment,
   type Client,
   type DeletedClient,
+  type SessionRecord,
   type Appointment,
   type SiteSettings,
 } from '../utils/store';
@@ -52,15 +53,15 @@ export default function Dashboard() {
   }, [refreshKey]);
 
   const upcomingAppointments = appointments
-    .filter((a) => a.dateTime > Date.now())
-    .sort((a, b) => a.dateTime - b.dateTime);
+    .filter((a: Appointment) => a.dateTime > Date.now())
+    .sort((a: Appointment, b: Appointment) => a.dateTime - b.dateTime);
 
   // Build upcoming follow-up sessions from client session histories
   const upcomingFollowUps = useMemo<FollowUpItem[]>(() => {
     const items: FollowUpItem[] = [];
     const now = Date.now();
-    clients.forEach((client) => {
-      (client.sessionHistory || []).forEach((s) => {
+    clients.forEach((client: Client) => {
+      (client.sessionHistory || []).forEach((s: SessionRecord) => {
         if (s.followUpDate) {
           const fuDate = new Date(s.followUpDate).getTime();
           if (fuDate > now) {
@@ -79,10 +80,10 @@ export default function Dashboard() {
   }, [clients]);
 
   const completedCases = deletedClients.length;
-  const activeCases = clients.filter((c) => c.status === 'active').length;
+  const activeCases = clients.filter((c: Client) => c.status === 'active').length;
   const completedClients = clients
-    .filter((c) => c.status === 'completed')
-    .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    .filter((c: Client) => c.status === 'completed')
+    .sort((a: Client, b: Client) => (b.createdAt || 0) - (a.createdAt || 0));
 
   // Find client ID for an appointment by name match
   function findClientId(name: string): string | undefined {
@@ -117,7 +118,7 @@ export default function Dashboard() {
       if (c.id === clientId) {
         return {
           ...c,
-          sessionHistory: c.sessionHistory?.filter((s) => s.id !== recordId) || [],
+          sessionHistory: c.sessionHistory?.filter((s: SessionRecord) => s.id !== recordId) || [],
         };
       }
       return c;

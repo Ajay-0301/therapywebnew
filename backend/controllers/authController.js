@@ -3,22 +3,22 @@ const jwt = require('jsonwebtoken');
 
 exports.register = async (req, res) => {
   try {
-    const { username, password, email, fullName } = req.body;
+    const { email, password, name } = req.body;
 
-    if (!username || !password) {
-      return res.status(400).json({ message: 'Username and password required' });
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password required' });
     }
 
-    const existingUser = await User.findOne({ username });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: 'Username already exists' });
+      return res.status(400).json({ message: 'Email already exists' });
     }
 
     const user = new User({
-      username,
+      username: email, // Use email as username
       password,
       email,
-      fullName,
+      fullName: name || email.split('@')[0],
     });
 
     await user.save();
@@ -32,7 +32,7 @@ exports.register = async (req, res) => {
     res.status(201).json({
       message: 'User registered successfully',
       token,
-      user: { id: user._id, username: user.username, email: user.email },
+      user: { id: user._id, username: user.username, email: user.email, name: user.fullName },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -41,13 +41,24 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, email, password } = req.body;
 
-    if (!username || !password) {
-      return res.status(400).json({ message: 'Username and password required' });
+    if (!password) {
+      return res.status(400).json({ message: 'Password required' });
     }
 
-    const user = await User.findOne({ username });
+    if (!username && !email) {
+      return res.status(400).json({ message: 'Username or email required' });
+    }
+
+    // Find user by username or email
+    let user = null;
+    if (email) {
+      user = await User.findOne({ email });
+    } else {
+      user = await User.findOne({ username });
+    }
+
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
@@ -66,7 +77,7 @@ exports.login = async (req, res) => {
     res.json({
       message: 'Login successful',
       token,
-      user: { id: user._id, username: user.username, email: user.email },
+      user: { id: user._id, username: user.username, email: user.email, name: user.fullName },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

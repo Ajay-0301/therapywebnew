@@ -1,16 +1,55 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  getClients,
-  saveClients,
   getSiteSettings,
   formatTimeDisplay,
   format24to12,
-  type Client,
-  type SessionRecord,
   type SiteSettings,
 } from '../utils/store';
+import * as api from '../utils/api';
 import '../styles/client-profile.css';
+
+interface SessionRecord {
+  id: string;
+  date: string;
+  notes: string;
+  followUpDate: string;
+  followUpNotes: string;
+}
+
+interface Client {
+  id: string;
+  _id?: string;
+  clientId: string;
+  name: string;
+  email: string;
+  phone?: string;
+  age?: number;
+  gender?: string;
+  relationshipStatus?: string;
+  occupation?: string;
+  status: 'active' | 'completed' | 'on-hold';
+  sessionCount?: number;
+  chiefComplaints?: string;
+  hopi?: string;
+  sessionHistory?: SessionRecord[];
+  createdAt?: string | number;
+}
+
+interface UpdateClientPayload {
+  name?: string;
+  email?: string;
+  phone?: string;
+  age?: number;
+  gender?: string;
+  relationshipStatus?: string;
+  occupation?: string;
+  status?: 'active' | 'completed' | 'on-hold';
+  sessionCount?: number;
+  chiefComplaints?: string;
+  hopi?: string;
+  sessionHistory?: SessionRecord[];
+}
 
 export default function ClientProfile() {
   const { id } = useParams<{ id: string }>();
@@ -19,12 +58,13 @@ export default function ClientProfile() {
   const [client, setClient] = useState<Client | null>(null);
   const [editing, setEditing] = useState(false);
   const [timeFormat, setTimeFormat] = useState<SiteSettings['timeFormat']>('12h');
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   // Editable profile fields
   const [name, setName] = useState('');
   const [age, setAge] = useState(0);
   const [occupation, setOccupation] = useState('');
-  const [status, setStatus] = useState<'active' | 'completed'>('active');
+  const [status, setStatus] = useState<'active' | 'completed' | 'on-hold'>('active');
   const [sessionCount, setSessionCount] = useState(0);
 
   // Clinical fields
@@ -41,20 +81,45 @@ export default function ClientProfile() {
   const sessionTimer = useRef<number | null>(null);
 
   useEffect(() => {
-    const clients = getClients();
-    const found = clients.find((c: Client) => c.id === id);
-    if (!found) {
-      navigate('/clients');
-      return;
-    }
-    setClient(found);
-    setName(found.name);
-    setAge(found.age);
-    setOccupation(found.occupation || '');
-    setStatus(found.status || 'active');
-    setSessionCount(found.sessionCount || 0);
-    setChiefComplaints(found.chiefComplaints || '');
-    setHopi(found.hopi || '');
+    const loadClient = async () => {
+      try {
+        if (!id) {
+          navigate('/clients');
+          return;
+        }
+        
+        console.log('Loading client with ID:', id);
+        
+        // Fetch the specific client directly from API (more efficient than fetching all)
+        const allClients = await api.getClients() as Client[];
+        const foundClient = Array.isArray(allClients) ? allClients.find((c: Client) => {
+          const matches = (c._id === id) || (c.id === id);
+          console.log(`Comparing client "${c.name}" - _id:"${c._id}" id:"${c.id}" against param:"${id}" - matches:${matches}`);
+          return matches;
+        }) : null;
+        
+        if (!foundClient) {
+          console.error('Client not found with ID:', id, 'Available clients:', allClients?.map((c: Client) => ({ name: c.name, _id: c._id, id: c.id })));
+          navigate('/clients');
+          return;
+        }
+        
+        console.log('Found client:', foundClient);
+        setClient(foundClient);
+        setName(foundClient.name);
+        setAge(foundClient.age || 0);
+        setOccupation(foundClient.occupation || '');
+        setStatus(foundClient.status || 'active');
+        setSessionCount(foundClient.sessionCount || 0);
+        setChiefComplaints(foundClient.chiefComplaints || '');
+        setHopi(foundClient.hopi || '');
+      } catch (err) {
+        console.error('Failed to load client:', err);
+        navigate('/clients');
+      }
+    };
+    
+    loadClient();
     
     const settings = getSiteSettings();
     setTimeFormat(settings.timeFormat);
@@ -66,40 +131,35 @@ export default function ClientProfile() {
     
     window.addEventListener('site-settings-updated', handleSettingsChange);
     
-    // ensure UI shows persisted values
-    // listen for storage changes in other tabs
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === 'therapyClients') {
-        const clients = getClients();
-        const f = clients.find((c: Client) => c.id === id);
-        if (f) {
-          setClient(f);
-          setName(f.name);
-          setAge(f.age);
-          setOccupation(f.occupation || '');
-          setStatus(f.status || 'active');
-          setSessionCount(f.sessionCount || 0);
-          setChiefComplaints(f.chiefComplaints || '');
-          setHopi(f.hopi || '');
-        }
-      }
-    };
-    window.addEventListener('storage', onStorage);
     return () => {
-      window.removeEventListener('storage', onStorage);
       window.removeEventListener('site-settings-updated', handleSettingsChange);
     };
   }, [id, navigate]);
 
   function persist(updated: Partial<Client>) {
     if (!client) return;
-    const clients = getClients();
-    const idx = clients.findIndex((c: Client) => c.id === client.id);
-    if (idx === -1) return;
-    const merged = { ...clients[idx], ...updated };
-    clients[idx] = merged;
-    saveClients(clients);
-    setClient(merged);
+    const merged = { ...client, ...updated };
+    const clientId = client._id || client.id;
+    if (!clientId) {
+      console.error('No client ID found:', client);
+      return;
+    }
+    
+    console.log('Persisting client update:', { clientId, merged });
+    
+    // Persist to backend and update state with response
+    api.updateClient(clientId, merged)
+      .then(() => {
+        console.log('Client updated successfully');
+        setClient(merged);
+        // Emit event to notify other components (e.g., Calendar) that data changed
+        window.dispatchEvent(new CustomEvent('clientDataUpdated', { detail: merged }));
+      })
+      .catch(err => {
+        console.error('Failed to update client:', err);
+        // Still update local state even if API fails
+        setClient(merged);
+      });
   }
 
   function handleSaveProfile() {
@@ -122,7 +182,11 @@ export default function ClientProfile() {
 
   function handleSaveSession() {
     if (!client) return;
-    // Combine date and time if time is provided
+    
+    // Session always uses current time
+    const fullSessionDate = new Date().toISOString();
+    
+    // Combine follow-up date and the session timing entered by user
     let fullFollowUpDate = followUpDate;
     if (followUpDate && followUpTime) {
       const [hours, minutes] = followUpTime.split(':');
@@ -130,9 +194,10 @@ export default function ClientProfile() {
       dateObj.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
       fullFollowUpDate = dateObj.toISOString();
     }
+    
     const record: SessionRecord = {
       id: crypto.randomUUID(),
-      date: new Date().toISOString(),
+      date: fullSessionDate,
       notes: sessionNotes,
       followUpDate: fullFollowUpDate,
       followUpNotes,
@@ -149,6 +214,20 @@ export default function ClientProfile() {
     if (!client) return;
     const history = (client.sessionHistory || []).filter((s: SessionRecord) => s.id !== recordId);
     persist({ sessionHistory: history });
+  }
+
+  async function confirmDeleteClient() {
+    if (!client) return;
+    try {
+      await api.deleteClient(client._id || client.id);
+      // Broadcast change to other components
+      window.dispatchEvent(new CustomEvent('clientDataUpdated'));
+      // Redirect back to clients list
+      navigate('/clients');
+    } catch (err) {
+      console.error('Failed to delete client:', err);
+      alert('Failed to delete client. Please try again.');
+    }
   }
 
   function incrementSession() {
@@ -260,6 +339,11 @@ export default function ClientProfile() {
                   <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
                 </svg>
               )}
+            </button>
+            <button className="btn-delete" onClick={() => setDeleteConfirm(true)} title="Delete client">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+              </svg>
             </button>
           </div>
         </div>
@@ -464,15 +548,17 @@ export default function ClientProfile() {
           <p className="empty-history">No sessions recorded yet.</p>
         ) : (
           <div className="history-list">
-            {[...client.sessionHistory].reverse().map((s, i) => (
+            {[...(client.sessionHistory || [])].reverse().map((s, i) => (
               <div key={s.id} className="history-item">
                 {/* Header row */}
                 <div className="history-header">
                   <div className="history-header-left">
-                    <div className="history-number">#{client.sessionHistory.length - i}</div>
+                    <div className="history-number">#{(client.sessionHistory?.length || 0) - i}</div>
                     <div className="history-date-group">
                       <p className="history-date">
                         {new Date(s.date).toLocaleDateString([], { year: 'numeric', month: 'long', day: 'numeric' })}
+                        {' at '}
+                        {new Date(s.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: timeFormat === '12h' })}
                       </p>
                       <p className="history-date-sub">
                         {new Date(s.date).toLocaleDateString([], { weekday: 'long' })}
@@ -536,6 +622,35 @@ export default function ClientProfile() {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className="modal-overlay" onClick={() => setDeleteConfirm(false)}>
+          <div className="modal-content delete-confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Delete Client</h3>
+              <button className="modal-close" onClick={() => setDeleteConfirm(false)}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+            <div className="modal-body">
+              <p>Are you sure you want to delete <strong>{client.name}</strong>?</p>
+              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '8px' }}>This action cannot be undone. All session history will be lost.</p>
+            </div>
+            <div className="modal-actions">
+              <button type="button" className="btn btn-secondary" onClick={() => setDeleteConfirm(false)}>
+                Cancel
+              </button>
+              <button type="button" className="btn btn-danger" onClick={confirmDeleteClient}>
+                Delete Client
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

@@ -1,6 +1,40 @@
 import { useState, useEffect } from 'react';
-import { getClients, getDeletedClients, getAppointments, getEarnings, saveEarnings, type Client, type DeletedClient, type Appointment, type Earning } from '../utils/store';
+import * as api from '../utils/api';
 import '../styles/insights.css';
+
+interface Client {
+  id: string;
+  clientId: string;
+  name: string;
+  email: string;
+  phone?: string;
+  age?: number;
+  status: 'active' | 'completed' | 'on-hold';
+  createdAt?: string | number;
+}
+
+interface DeletedClient {
+  id: string;
+  clientId: string;
+  name: string;
+  email: string;
+  deletedAt: number;
+}
+
+interface Appointment {
+  id: string;
+  clientName: string;
+  dateTime: number;
+  status?: 'scheduled' | 'completed' | 'cancelled';
+}
+
+interface Earning {
+  id: string;
+  day: number;
+  month: number;
+  year: number;
+  amount: number;
+}
 
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -28,10 +62,22 @@ export default function Insights() {
   const availableYears = Array.from({ length: 10 }, (_, i) => 2026 + i);
 
   useEffect(() => {
-    setClients(getClients());
-    setDeletedClients(getDeletedClients());
-    setAppointments(getAppointments());
-    setEarnings(getEarnings());
+    const loadData = async () => {
+      try {
+        const [clientsData, appointmentsData, earningsData] = await Promise.all([
+          api.getClients(),
+          api.getAppointments(),
+          api.getEarnings(),
+        ]);
+        setClients(Array.isArray(clientsData) ? clientsData : []);
+        setDeletedClients([]);
+        setAppointments(Array.isArray(appointmentsData) ? appointmentsData : []);
+        setEarnings(Array.isArray(earningsData) ? earningsData : []);
+      } catch (err) {
+        console.error('Failed to load insights data:', err);
+      }
+    };
+    loadData();
   }, []);
 
   // Calculate metrics for selected month
@@ -101,7 +147,7 @@ export default function Insights() {
         return e;
       });
       setEarnings(updated);
-      saveEarnings(updated);
+      api.saveEarnings(updated).catch(err => console.error('Failed to save earnings:', err));
     } else {
       // Create a new entry for day 1
       const newEarning: Earning = {
@@ -110,11 +156,10 @@ export default function Insights() {
         month: selectedMonth,
         year: selectedYear,
         amount: newTotal,
-        timestamp: Date.now()
       };
       const updated = [...earnings, newEarning];
       setEarnings(updated);
-      saveEarnings(updated);
+      api.saveEarnings(updated).catch(err => console.error('Failed to save earnings:', err));
     }
     
     setEditingTotalEarnings(false);
@@ -196,7 +241,7 @@ export default function Insights() {
     }
     
     setEarnings(updated);
-    saveEarnings(updated);
+    api.saveEarnings(updated).catch(err => console.error('Failed to save earnings:', err));
     setEarnDay('');
     setEarnAmount('');
   };
@@ -221,7 +266,7 @@ export default function Insights() {
     });
     
     setEarnings(updated);
-    saveEarnings(updated);
+    api.saveEarnings(updated).catch(err => console.error('Failed to save earnings:', err));
     setEditingDay(null);
     setEditAmount('');
   };
@@ -231,7 +276,7 @@ export default function Insights() {
       e => !(e.day === day && e.month === selectedMonth && e.year === selectedYear)
     );
     setEarnings(updated);
-    saveEarnings(updated);
+    api.saveEarnings(updated).catch(err => console.error('Failed to save earnings:', err));
     setEditingDay(null);
     setEditAmount('');
   };

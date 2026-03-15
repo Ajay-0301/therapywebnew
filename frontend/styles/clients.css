@@ -445,6 +445,46 @@
     margin-top: 24px;
 }
 
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.delete-confirm-modal {
+    max-width: 420px !important;
+}
+
+.modal-body {
+    padding: 24px;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+.modal-body p {
+    margin: 0;
+    font-size: 15px;
+}
+
+.modal-body p strong {
+    font-weight: 700;
+}
+
+.modal-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-primary);
+}
+
 /* ========================================================================
    CLIENT CARD ENHANCEMENTS
    ======================================================================== */
@@ -777,6 +817,15 @@ body.dark-mode .modal-header {
 
 body.dark-mode .modal-header h3 {
     color: #f1f5f9;
+}
+
+body.dark-mode .modal-body {
+    color: #cbd5e1;
+    border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+body.dark-mode .modal-body p {
+    color: #cbd5e1;
 }
 
 body.dark-mode .form-row label {

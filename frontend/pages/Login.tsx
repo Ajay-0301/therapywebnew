@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { saveUserData } from '../utils/store';
+import * as api from '../utils/api';
 import '../styles/login.css';
 
 // Feature lists configuration
@@ -15,12 +16,6 @@ const REGISTER_FEATURES = [
     'Start Immediately',
     '24/7 Support'
 ];
-
-// Demo account configuration
-const DEMO_ACCOUNT = {
-    email: 'demo@therapy.com',
-    password: 'Demo@12345'
-};
 
 // Validation configuration
 const MIN_PASSWORD_LENGTH = 8;
@@ -58,7 +53,7 @@ export default function Login() {
         return 'strong';
     };
 
-    const handleLogin = (e: FormEvent) => {
+    const handleLogin = async (e: FormEvent) => {
         e.preventDefault();
         setError('');
 
@@ -67,13 +62,22 @@ export default function Login() {
             return;
         }
 
-        // Demo login or any login
-        const userData = { email: loginEmail, name: loginEmail.split('@')[0], registeredAt: new Date().toISOString() };
-        saveUserData(userData);
-        navigate('/dashboard');
+        try {
+            const response = await api.login(loginEmail, loginPassword);
+            const userData = { 
+                email: response.user.email, 
+                name: response.user.name, 
+                id: response.user.id,
+                registeredAt: new Date().toISOString() 
+            };
+            saveUserData(userData);
+            navigate('/dashboard');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Login failed. Please check your credentials.');
+        }
     };
 
-    const handleRegister = (e: FormEvent) => {
+    const handleRegister = async (e: FormEvent) => {
         e.preventDefault();
         setError('');
 
@@ -90,9 +94,19 @@ export default function Login() {
             return;
         }
 
-        const userData = { email: regEmail, name: regName, registeredAt: new Date().toISOString() };
-        saveUserData(userData);
-        navigate('/dashboard');
+        try {
+            const response = await api.register(regEmail, regPassword, regName);
+            const userData = { 
+                email: response.user.email, 
+                name: response.user.name,
+                id: response.user.id,
+                registeredAt: new Date().toISOString() 
+            };
+            saveUserData(userData);
+            navigate('/dashboard');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Registration failed. Please try again.');
+        }
     };
 
     const strength = getPasswordStrength(regPassword);
@@ -150,12 +164,6 @@ export default function Login() {
 
                             <div className="auth-divider"><span>New to Therapy Notes?</span></div>
                             <button className="btn btn-secondary" style={{ width: '100%' }} onClick={() => { setIsLogin(false); setError(''); }}>Create an Account</button>
-
-                            <div className="demo-section">
-                                <p className="demo-title">Demo Account</p>
-                                <p className="demo-text">Email: <strong>{DEMO_ACCOUNT.email}</strong></p>
-                                <p className="demo-text">Password: <strong>{DEMO_ACCOUNT.password}</strong></p>
-                            </div>
                         </div>
                     </div>
                 </div>

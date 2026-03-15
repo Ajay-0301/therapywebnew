@@ -2,7 +2,7 @@ const Appointment = require('../models/Appointment');
 
 exports.getAllAppointments = async (req, res) => {
   try {
-    const appointments = await Appointment.find().populate('clientId');
+    const appointments = await Appointment.find({ userId: req.user.id }).populate('clientId');
     res.json(appointments);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -11,7 +11,7 @@ exports.getAllAppointments = async (req, res) => {
 
 exports.getAppointmentById = async (req, res) => {
   try {
-    const appointment = await Appointment.findById(req.params.id).populate('clientId');
+    const appointment = await Appointment.findOne({ _id: req.params.id, userId: req.user.id }).populate('clientId');
     if (!appointment) {
       return res.status(404).json({ message: 'Appointment not found' });
     }
@@ -25,13 +25,18 @@ exports.createAppointment = async (req, res) => {
   try {
     const { clientId, clientName, type, dateTime, location, notes, status } = req.body;
 
-    if (!clientId || !dateTime) {
-      return res.status(400).json({ message: 'Client ID and dateTime required' });
+    if (!dateTime) {
+      return res.status(400).json({ message: 'dateTime is required' });
+    }
+
+    if (!clientName) {
+      return res.status(400).json({ message: 'Client name is required' });
     }
 
     const appointment = new Appointment({
+      userId: req.user.id,
       id: new Date().getTime().toString(),
-      clientId,
+      clientId: clientId || null, // Optional: can be null if not provided
       clientName,
       type,
       dateTime: new Date(dateTime),
@@ -51,8 +56,8 @@ exports.updateAppointment = async (req, res) => {
   try {
     const { clientName, type, dateTime, location, notes, status } = req.body;
 
-    const appointment = await Appointment.findByIdAndUpdate(
-      req.params.id,
+    const appointment = await Appointment.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user.id },
       {
         clientName,
         type,
@@ -76,7 +81,7 @@ exports.updateAppointment = async (req, res) => {
 
 exports.deleteAppointment = async (req, res) => {
   try {
-    const appointment = await Appointment.findByIdAndDelete(req.params.id);
+    const appointment = await Appointment.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
     if (!appointment) {
       return res.status(404).json({ message: 'Appointment not found' });
     }

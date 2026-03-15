@@ -1,13 +1,9 @@
 import { useState, useEffect, FormEvent, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  getClients,
-  saveClients,
-  getDeletedClients,
-  saveDeletedClients,
-  generateClientId,
   type Client,
 } from '../utils/store';
+import * as api from '../utils/api';
 import '../styles/clients.css';
 
 const GENDER_OPTIONS = ['Male', 'Female', 'Non-binary', 'Other', 'Prefer not to say'];
@@ -37,9 +33,32 @@ export default function Clients() {
 
   // Timer for age spinner hold-to-increment
   const ageTimer = useRef<number | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  // Delete confirmation state
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; clientId: string; clientName: string }>({
+    open: false,
+    clientId: '',
+    clientName: '',
+  });
+
+  // Load clients from API on mount
   useEffect(() => {
-    setClients(getClients());
+    const loadClients = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await api.getClients();
+        setClients(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Failed to load clients:', err);
+        setError('Failed to load clients. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadClients();
   }, []);
 
   const filtered = clients.filter((c) => {
@@ -59,21 +78,37 @@ export default function Clients() {
     );
   });
 
-  function openAdd() {
-    setEditingClient(null);
-    setClientId(generateClientId());
-    setClientIdError('');
-    setName('');
-    setContactType('email');
-    setEmail('');
-    setPhone('');
-    setGender('');
-    setRelationshipStatus('');
-    setAge(0);
-    setClientIdValid(true);
-    setSuggestedId('');
-    setModalOpen(true);
-    setFieldErrors({});
+  // Helper function to generate a random client ID
+  function generateClientId(): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = 'CL-';
+    for (let i = 0; i < 4; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
+
+  async function openAdd() {
+    try {
+      setEditingClient(null);
+      const id = await api.generateClientId();
+      setClientId(id);
+      setClientIdError('');
+      setName('');
+      setContactType('email');
+      setEmail('');
+      setPhone('');
+      setGender('');
+      setRelationshipStatus('');
+      setAge(0);
+      setClientIdValid(true);
+      setSuggestedId('');
+      setModalOpen(true);
+      setFieldErrors({});
+    } catch (error) {
+      console.error('Error generating client ID:', error);
+      setFieldErrors((f) => ({ ...f, submit: 'Failed to generate client ID' }));
+    }
   }
 
   function openEdit(c: Client) {
@@ -162,58 +197,119 @@ export default function Clients() {
       setFieldErrors((f) => ({ ...f, clientId: 'Client ID already used' }));
       return;
     }
-    if (editingClient) {
-      const updated = clients.map((c) =>
-        c.id === editingClient.id
-          ? { ...c, clientId: normalizedId, name, email: contactType === 'email' ? email : '', phone: contactType === 'phone' ? phone : '', gender, relationshipStatus, age }
-          : c
-      );
-      setClients(updated);
-      saveClients(updated);
-      setModalOpen(false);
-      navigate(`/clients/${editingClient.id}`);
-    } else {
-      const newClient: Client = {
-        id: crypto.randomUUID(),
-        clientId: normalizedId,
-        name,
-        email: contactType === 'email' ? email : '',
-        phone: contactType === 'phone' ? phone : '',
-        gender,
-        relationshipStatus,
-        age,
-        occupation: '',
-        status: 'active',
-        sessionCount: 0,
-        chiefComplaints: '',
-        hopi: '',
-        sessionHistory: [],
-        createdAt: Date.now(),
-      };
-      const updated = [newClient, ...clients];
-      setClients(updated);
-      saveClients(updated);
-      setModalOpen(false);
-      navigate(`/clients/${newClient.id}`);
-    }
+    
+    // Submit to API
+    const submitData = async () => {
+      try {
+        if (editingClient) {
+          const updated = {
+            name,
+            email: contactType === 'email' ? email : '',
+            phone: contactType === 'phone' ? phone : '',
+            gender,
+            relationshipStatus,
+            age,
+          };
+          await api.updateClient((editingClient as any)._id || editingClient.id, updated);
+          // Reload clients
+          const data = await api.getClients();
+          setClients(Array.isArray(data) ? data : []);
+          setModalOpen(false);
+          // Broadcast change to other components
+          window.dispatchEvent(new CustomEvent('clientDataUpdated'));
+          navigate(`/clients/${(editingClient as any)._id || editingClient.id}`);
+        } else {
+          const newClientData = {
+            clientId: normalizedId,
+            name,
+            email: contactType === 'email' ? email : '',
+            phone: contactType === 'phone' ? phone : '',
+            gender,
+            relationshipStatus,
+            age,
+            occupation: '',
+            status: 'active',
+          };
+          
+          // Validate all required fields
+          const hasEmail = contactType === 'email' && email.trim().length > 0;
+          const hasPhone = contactType === 'phone' && phone.trim().length > 0;
+          
+          if (!newClientData.clientId || !newClientData.name || (!hasEmail && !hasPhone)) {
+            console.error('Validation failed:', newClientData);
+            const requiredField = contactType === 'email' ? 'email' : 'phone';
+            setFieldErrors((f) => ({ ...f, submit: `Missing required fields: clientId, name, or ${requiredField}` }));
+            return;
+          }
+          
+          console.log('Sending client data:', newClientData);
+          const response = await api.createClient(newClientData);
+          console.log('Client created successfully:', response);
+          
+          // Close modal immediately
+          setModalOpen(false);
+          
+          // Reload clients and navigate
+          const data = await api.getClients();
+          setClients(Array.isArray(data) ? data : []);
+          
+          // Broadcast change to other components
+          window.dispatchEvent(new CustomEvent('clientDataUpdated'));
+          
+          // Navigate using the correct ID
+          const newClient = Array.isArray(data) ? data[data.length - 1] : null;
+          const newClientId = (newClient as any)?._id || newClient?.id;
+          if (newClientId) {
+            navigate(`/clients/${newClientId}`);
+          } else {
+            navigate('/clients');
+          }
+        }
+      } catch (err) {
+        console.error('Full error details:', err);
+        const errorMsg = err instanceof Error ? err.message : 'Failed to save client. Please try again.';
+        console.error('Error message:', errorMsg);
+        setFieldErrors((f) => ({ ...f, submit: errorMsg }));
+      }
+    };
+    
+    submitData();
   }
 
   function handleDelete(id: string) {
     const client = clients.find((c) => c.id === id);
     if (!client) return;
-    const deleted = getDeletedClients();
-    deleted.unshift({
-      id: client.id,
-      clientId: client.clientId,
-      name: client.name,
-      email: client.email,
-      deletedAt: Date.now(),
+    
+    // Show custom confirmation modal instead of window.confirm
+    setDeleteConfirm({
+      open: true,
+      clientId: id,
+      clientName: client.name,
     });
-    saveDeletedClients(deleted);
+  }
 
-    const updated = clients.filter((c) => c.id !== id);
-    setClients(updated);
-    saveClients(updated);
+  async function confirmDelete() {
+    const { clientId, open } = deleteConfirm;
+    if (!open || !clientId) return;
+
+    try {
+      await api.deleteClient(clientId);
+      // Reload clients
+      const data = await api.getClients();
+      setClients(Array.isArray(data) ? data : []);
+      setDeleteConfirm({ open: false, clientId: '', clientName: '' });
+      
+      // Broadcast change to other components (Dashboard, Calendar, etc)
+      window.dispatchEvent(new CustomEvent('clientDataUpdated'));
+    } catch (err) {
+      console.error('Failed to delete client:', err);
+      setError('Failed to delete client. Please try again.');
+      setDeleteConfirm({ open: false, clientId: '', clientName: '' });
+    }
+  }
+
+  function cancelDelete() {
+    setDeleteConfirm({ open: false, clientId: '', clientName: '' });
   }
 
   return (
@@ -289,7 +385,7 @@ export default function Clients() {
           </div>
         ) : (
           filtered.map((c) => (
-            <div key={c.id} className="client-card" onClick={() => navigate(`/clients/${c.id}`)}>
+            <div key={c.id} className="client-card" onClick={() => navigate(`/clients/${(c as any)._id || c.id}`)}>
               <div className="client-card-top">
                 <div className="client-avatar">
                   {(c.name || 'U').charAt(0).toUpperCase()}
@@ -545,6 +641,35 @@ export default function Clients() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm.open && (
+        <div className="modal-overlay" onClick={cancelDelete}>
+          <div className="modal-content delete-confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Delete Client</h3>
+              <button className="modal-close" onClick={cancelDelete}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+            <div className="modal-body">
+              <p>Are you sure you want to delete <strong>{deleteConfirm.clientName}</strong>?</p>
+              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '8px' }}>This action cannot be undone.</p>
+            </div>
+            <div className="modal-actions">
+              <button type="button" className="btn btn-secondary" onClick={cancelDelete}>
+                Cancel
+              </button>
+              <button type="button" className="btn btn-danger" onClick={confirmDelete}>
+                Delete Client
+              </button>
+            </div>
           </div>
         </div>
       )}

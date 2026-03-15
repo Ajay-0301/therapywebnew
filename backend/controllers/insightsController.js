@@ -9,10 +9,10 @@ exports.getInsightsData = async (req, res) => {
     const selectedMonth = month ? parseInt(month) : new Date().getMonth();
     const selectedYear = year ? parseInt(year) : new Date().getFullYear();
 
-    const clients = await Client.find();
-    const deletedClients = await DeletedClient.find();
-    const appointments = await Appointment.find();
-    const earnings = await Earning.find();
+    const clients = await Client.find({ userId: req.user.id });
+    const deletedClients = await DeletedClient.find({ userId: req.user.id });
+    const appointments = await Appointment.find({ userId: req.user.id });
+    const earnings = await Earning.find({ userId: req.user.id });
 
     // Filter clients added this month
     const clientsAddedThisMonth = clients.filter(c => {
@@ -64,8 +64,8 @@ exports.getInsightsData = async (req, res) => {
 
 exports.getClientsStats = async (req, res) => {
   try {
-    const clients = await Client.find();
-    const deletedClients = await DeletedClient.find();
+    const clients = await Client.find({ userId: req.user.id });
+    const deletedClients = await DeletedClient.find({ userId: req.user.id });
 
     const stats = {
       total: clients.length,
@@ -82,7 +82,7 @@ exports.getClientsStats = async (req, res) => {
 
 exports.getAgeDistribution = async (req, res) => {
   try {
-    const clients = await Client.find();
+    const clients = await Client.find({ userId: req.user.id });
     const ages = clients.map(c => c.age).filter(a => a);
 
     const ageRanges = {
@@ -110,7 +110,7 @@ exports.getEarningsStats = async (req, res) => {
     const selectedMonth = month ? parseInt(month) : new Date().getMonth();
     const selectedYear = year ? parseInt(year) : new Date().getFullYear();
 
-    const earnings = await Earning.find({ month: selectedMonth, year: selectedYear });
+    const earnings = await Earning.find({ userId: req.user.id, month: selectedMonth, year: selectedYear });
     const totalEarnings = earnings.reduce((sum, e) => sum + e.amount, 0);
     const avgDaily = earnings.length > 0 ? totalEarnings / earnings.length : 0;
 

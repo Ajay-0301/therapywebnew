@@ -1,17 +1,37 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  getAppointments,
-  saveAppointments,
-  getClients,
   getSiteSettings,
   formatTimeDisplay,
-  type Appointment,
-  type Client,
-  type SessionRecord,
   type SiteSettings,
 } from '../utils/store';
+import * as api from '../utils/api';
 import '../styles/calendar.css';
+
+interface Appointment {
+  id: string;
+  clientName: string;
+  clientAge?: number;
+  dateTime: number;
+  duration?: number;
+  notes?: string;
+  status?: 'scheduled' | 'completed' | 'cancelled';
+}
+
+interface Client {
+  id: string;
+  name: string;
+  age?: number;
+  sessionHistory?: SessionRecord[];
+}
+
+interface SessionRecord {
+  id: string;
+  date: string;
+  notes: string;
+  followUpDate: string;
+  followUpNotes: string;
+}
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTH_NAMES = [
@@ -63,6 +83,7 @@ export default function Calendar() {
 
   // Form state
   const [formName, setFormName] = useState('');
+  const [formClientId, setFormClientId] = useState(''); // MongoDB _id
   const [formAge, setFormAge] = useState('');
   const [formDate, setFormDate] = useState('');
   const [formTime, setFormTime] = useState(DEFAULT_APPOINTMENT_TIME);
@@ -70,8 +91,42 @@ export default function Calendar() {
   const [formError, setFormError] = useState('');
 
   useEffect(() => {
-    setAppointments(getAppointments());
-    setClients(getClients());
+    const loadData = async () => {
+      try {
+        console.log('Calendar: Fetching fresh data from API...');
+        const [appointmentsData, clientsData] = await Promise.all([
+          api.getAppointments(),
+          api.getClients(),
+        ]);
+        console.log('Calendar: Loaded appointments:', appointmentsData);
+        console.log('Calendar: Loaded clients with sessions:', clientsData);
+        setAppointments(Array.isArray(appointmentsData) ? appointmentsData : []);
+        setClients(Array.isArray(clientsData) ? clientsData : []);
+      } catch (err) {
+        console.error('Failed to load calendar data:', err);
+      }
+    };
+    
+    // Load data on mount
+    loadData();
+    
+    // Reload data when client data is updated from other components (e.g., ClientProfile saves a session)
+    const handleClientDataUpdated = (event: Event) => {
+      console.log('Calendar: Client data was updated from ClientProfile, reloading...');
+      loadData();
+    };
+    
+    // Reload data when page becomes visible (tab focused)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('Calendar: Tab became visible, refreshing data...');
+        loadData();
+      }
+    };
+    
+    window.addEventListener('clientDataUpdated', handleClientDataUpdated);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
     const settings = getSiteSettings();
     setTimeFormat(settings.timeFormat);
     
@@ -81,7 +136,12 @@ export default function Calendar() {
     };
     
     window.addEventListener('site-settings-updated', handleSettingsChange);
-    return () => window.removeEventListener('site-settings-updated', handleSettingsChange);
+    
+    return () => {
+      window.removeEventListener('clientDataUpdated', handleClientDataUpdated);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('site-settings-updated', handleSettingsChange);
+    };
   }, []);
 
   // Build follow-up events from client session histories
@@ -95,7 +155,7 @@ export default function Calendar() {
           events.push({
             id: `fu-${s.id}`,
             clientName: client.name,
-            clientId: client.id,
+            clientId: (client as any)._id || client.id,
             clientAge: client.age,
             dateTime: fuDate.getTime(),
             duration: 60,
@@ -172,6 +232,7 @@ export default function Calendar() {
 
   function openNewSession() {
     setFormName('');
+    setFormClientId('');
     setFormAge('');
     const now = new Date();
     const year = now.getFullYear();
@@ -187,6 +248,7 @@ export default function Calendar() {
 
   function openNewSessionOnDay(day: Date) {
     setFormName('');
+    setFormClientId('');
     setFormAge('');
     const year = day.getFullYear();
     const month = String(day.getMonth() + 1).padStart(2, '0');
@@ -226,16 +288,26 @@ export default function Calendar() {
       duration: parseInt(formDuration, 10) || 60,
     };
 
+    // Add clientId for backend only if provided
+    const appointmentWithClientId = {
+      ...newAppt,
+      ...(formClientId && { clientId: formClientId }),
+    };
+
     const updated = [...appointments, newAppt];
-    saveAppointments(updated);
+    api.createAppointment(appointmentWithClientId).catch(err => console.error('Failed to save appointment:', err));
     setAppointments(updated);
+    // Broadcast change to Dashboard and other components
+    window.dispatchEvent(new CustomEvent('clientDataUpdated'));
     setShowModal(false);
   }
 
   function deleteAppointment(id: string) {
     const updated = appointments.filter((a) => a.id !== id);
-    saveAppointments(updated);
+    api.deleteAppointment(id).catch(err => console.error('Failed to delete appointment:', err));
     setAppointments(updated);
+    // Broadcast change to Dashboard
+    window.dispatchEvent(new CustomEvent('clientDataUpdated'));
   }
 
   const today = new Date();
@@ -293,7 +365,6 @@ export default function Calendar() {
               <h3 className="cal-month-title">
                 {MONTH_NAMES[currentDate.getMonth()]} {currentDate.getFullYear()}
               </h3>
-              <button className="cal-today-btn" onClick={goToToday}>Today</button>
             </div>
             <button className="cal-nav-btn" onClick={nextMonth} title="Next month">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -508,16 +579,38 @@ export default function Calendar() {
                 <input
                   type="text"
                   value={formName}
-                  onChange={(e) => { setFormName(e.target.value); setFormError(''); }}
-                  placeholder="Enter client name"
-                  list="client-suggestions"
+                  onChange={(e) => { 
+                    setFormName(e.target.value); 
+                    setFormError('');
+                  }}
+                  placeholder="Enter any client name"
                   autoFocus
                 />
-                <datalist id="client-suggestions">
-                  {clientNames.map((n: string) => (
-                    <option key={n} value={n} />
+              </div>
+
+              <div className="cal-form-group">
+                <label>Client ID (Optional)</label>
+                <select
+                  value={formClientId}
+                  onChange={(e) => {
+                    const selectedId = e.target.value;
+                    setFormClientId(selectedId);
+                    // Auto-fill client name if selecting from dropdown
+                    if (selectedId) {
+                      const matchedClient = clients.find((c: Client) => (c as any)._id === selectedId || c.id === selectedId);
+                      if (matchedClient && !formName) {
+                        setFormName(matchedClient.name);
+                      }
+                    }
+                  }}
+                >
+                  <option value="">-- Select a client (optional) --</option>
+                  {clients.map((client: Client) => (
+                    <option key={(client as any)._id || client.id} value={(client as any)._id || client.id}>
+                      {client.name} {client.age ? `(${client.age})` : ''}
+                    </option>
                   ))}
-                </datalist>
+                </select>
               </div>
 
               <div className="cal-form-group">

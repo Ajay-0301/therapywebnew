@@ -1,23 +1,40 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  getClients,
-  getDeletedClients,
-  getAppointments,
-  saveClients,
-  saveDeletedClients,
   getSiteSettings,
   timeAgo,
   formatDateTime,
-  deleteDeletedClient,
-  deleteAppointment,
   type Client,
-  type DeletedClient,
-  type SessionRecord,
-  type Appointment,
   type SiteSettings,
 } from '../utils/store';
+import * as api from '../utils/api';
 import '../styles/dashboard.css';
+
+interface Appointment {
+  id: string;
+  clientName: string;
+  clientAge?: number;
+  dateTime: number;
+  duration?: number;
+  notes?: string;
+  status?: 'scheduled' | 'completed' | 'cancelled';
+}
+
+interface SessionRecord {
+  id: string;
+  date: string;
+  notes: string;
+  followUpDate: string;
+  followUpNotes: string;
+}
+
+interface DeletedClient {
+  id: string;
+  clientId: string;
+  name: string;
+  email: string;
+  deletedAt: number;
+}
 
 interface FollowUpItem {
   id: string;
@@ -34,11 +51,45 @@ export default function Dashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
   const [timeFormat, setTimeFormat] = useState<SiteSettings['timeFormat']>('12h');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setClients(getClients());
-    setDeletedClients(getDeletedClients());
-    setAppointments(getAppointments());
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        const [clientsData, appointmentsData, deletedClientsData] = await Promise.all([
+          api.getClients(),
+          api.getAppointments(),
+          api.getDeletedClients(),
+        ]);
+        setClients(Array.isArray(clientsData) ? clientsData : []);
+        setAppointments(Array.isArray(appointmentsData) ? appointmentsData : []);
+        setDeletedClients(Array.isArray(deletedClientsData) ? deletedClientsData : []);
+      } catch (err) {
+        console.error('Failed to load dashboard data:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadData();
+    
+    // Listen for changes from other components
+    const handleClientDataUpdated = () => {
+      console.log('Dashboard: Data updated from other components, reloading...');
+      loadData();
+    };
+    
+    // Reload when page becomes visible (tab switching)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('Dashboard: Tab became visible, refreshing data...');
+        loadData();
+      }
+    };
+    
+    window.addEventListener('clientDataUpdated', handleClientDataUpdated);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     
     const settings = getSiteSettings();
     setTimeFormat(settings.timeFormat);
@@ -49,7 +100,11 @@ export default function Dashboard() {
     };
     
     window.addEventListener('site-settings-updated', handleSettingsChange);
-    return () => window.removeEventListener('site-settings-updated', handleSettingsChange);
+    return () => {
+      window.removeEventListener('clientDataUpdated', handleClientDataUpdated);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('site-settings-updated', handleSettingsChange);
+    };
   }, [refreshKey]);
 
   const upcomingAppointments = appointments
@@ -95,20 +150,18 @@ export default function Dashboard() {
   function handleDeleteCompletedClient(clientId: string) {
     const clientToDelete = clients.find(c => c.id === clientId);
     if (clientToDelete) {
-      const newClients = clients.filter(c => c.id !== clientId);
-      const newDeleted = [
-        {
-          id: clientToDelete.id,
-          clientId: clientToDelete.clientId,
-          name: clientToDelete.name,
-          email: clientToDelete.email,
-          deletedAt: Date.now(),
-        },
-        ...deletedClients,
-      ];
-      saveClients(newClients);
-      saveDeletedClients(newDeleted);
-      setRefreshKey(prev => prev + 1);
+      const deleteClient = async () => {
+        try {
+          await api.deleteClient(clientId);
+          // Reload clients
+          const data = await api.getClients();
+          setClients(Array.isArray(data) ? data : []);
+          setRefreshKey(prev => prev + 1);
+        } catch (err) {
+          console.error('Failed to delete client:', err);
+        }
+      };
+      deleteClient();
     }
   }
 
@@ -125,6 +178,20 @@ export default function Dashboard() {
     });
     saveClients(updatedClients);
     setRefreshKey(prev => prev + 1);
+  }
+
+  // Delete a permanently deleted client from the trash
+  async function deleteDeletedClient(deletedClientId: string) {
+    try {
+      // Call API to permanently delete the deleted client record
+      await api.apiRequest(`/clients/deleted/${deletedClientId}`, 'DELETE');
+      // Reload deleted clients list
+      const data = await api.getDeletedClients();
+      setDeletedClients(Array.isArray(data) ? data : []);
+      setRefreshKey(prev => prev + 1);
+    } catch (err) {
+      console.error('Failed to permanently delete client:', err);
+    }
   }
 
   return (
@@ -243,20 +310,20 @@ export default function Dashboard() {
                 <p>No recently deleted clients</p>
               </div>
             ) : (
-              deletedClients.slice(0, 5).map((dc) => (
-                <div key={dc.id} className="box-item">
+              deletedClients.slice(0, 5).map((dc: DeletedClient) => (
+                <div key={(dc as any)._id} className="box-item">
                   <div className="box-item-icon deleted-accent">
                     {(dc.name || 'U').charAt(0).toUpperCase()}
                   </div>
                   <div className="box-item-info">
                     <p className="box-item-name">{dc.name || 'Unknown'}</p>
-                    <p className="box-item-detail">{timeAgo(dc.deletedAt)}</p>
+                    <p className="box-item-detail">{timeAgo((dc as any).deletedAt)}</p>
                   </div>
                   <button
                     className="box-item-delete"
                     onClick={(e) => {
                       e.stopPropagation();
-                      deleteDeletedClient(dc.id);
+                      deleteDeletedClient((dc as any)._id);
                       setRefreshKey(prev => prev + 1);
                     }}
                     title="Delete permanently"
@@ -300,7 +367,7 @@ export default function Dashboard() {
                 <div
                   key={cc.id}
                   className="box-item"
-                  onClick={() => navigate(`/clients/${cc.id}`)}
+                  onClick={() => navigate(`/clients/${(cc as any)._id || cc.id}`)}
                   style={{ cursor: 'pointer' }}
                 >
                   <div className="box-item-icon completed-accent">
@@ -368,7 +435,7 @@ export default function Dashboard() {
                     key={appt.id}
                     className="box-item"
                     style={cId ? { cursor: 'pointer' } : undefined}
-                    onClick={cId ? () => navigate(`/clients/${cId}`) : undefined}
+                    onClick={cId ? () => navigate(`/clients/${(cId as any)._id || cId}`) : undefined}
                   >
                     <div className="box-item-icon appointment-accent">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

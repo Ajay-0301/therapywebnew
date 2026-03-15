@@ -22,6 +22,8 @@ app.use('/api/earnings', require('./routes/earnings'));
 app.use('/api/settings', require('./routes/settings'));
 app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/insights', require('./routes/insights'));
+app.use('/api/sessions', require('./routes/sessions'));
+app.use('/api/followups', require('./routes/followUps'));
 
 // Health check
 app.get('/health', (req, res) => {

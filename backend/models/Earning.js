@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
 const EarningSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    index: true,
+  },
   day: Number,
   month: Number,
   year: Number,

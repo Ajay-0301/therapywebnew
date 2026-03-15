@@ -204,6 +204,25 @@
     color: var(--primary);
 }
 
+.btn-delete {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.btn-delete:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
 /* ========================================================================
    FIELD BOX GRID
    ======================================================================== */
@@ -980,6 +999,15 @@ body.dark-mode .btn-edit {
 body.dark-mode .btn-edit:hover {
     background: rgba(102, 126, 234, 0.15);
     color: #a5b4fc;
+}
+
+body.dark-mode .btn-delete {
+    color: #cbd5e1;
+}
+
+body.dark-mode .btn-delete:hover {
+    background: rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
 }
 
 body.dark-mode .field-box {

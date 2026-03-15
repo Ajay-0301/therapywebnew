@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
 const DeletedClientSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    index: true,
+  },
   clientId: String,
   name: String,
   email: String,

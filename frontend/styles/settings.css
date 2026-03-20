@@ -115,6 +115,18 @@
     margin: 0;
 }
 
+.setting-static {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    background: rgba(148, 163, 184, 0.12);
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    border-radius: 10px;
+    min-width: 180px;
+    text-align: right;
+}
+
 .segmented {
     display: inline-flex;
     background: rgba(148, 163, 184, 0.12);

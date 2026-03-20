@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { applySiteSettings, resolveThemeMode } from '../utils/sitePreferences';
 import * as api from '../utils/api';
 import {
+  getUserData,
   getSiteSettings,
   saveSiteSettings,
   type SiteSettings
@@ -20,6 +21,13 @@ const languageOptions: Array<{ value: SiteSettings['language']; label: string; l
 export default function Settings() {
   const [settings, setSettings] = useState<SiteSettings>(() => getSiteSettings());
   const [draftSettings, setDraftSettings] = useState<SiteSettings>(() => getSiteSettings());
+  const [accountInfo, setAccountInfo] = useState<{ username: string; email: string }>(() => {
+    const user = getUserData();
+    return {
+      username: user?.name || '',
+      email: user?.email || '',
+    };
+  });
   const [saved, setSaved] = useState(false);
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
   const saveTimeoutRef = useRef<number | null>(null);
@@ -27,34 +35,6 @@ export default function Settings() {
   useEffect(() => {
     applySiteSettings(settings);
   }, [settings]);
-
-  useEffect(() => {
-    const hasToken = !!localStorage.getItem('authToken');
-    if (!hasToken) return;
-
-    const loadRemoteSettings = async () => {
-      try {
-        const remote = await api.getSettings() as any;
-        const merged: SiteSettings = {
-          themeMode: remote.theme === 'dark' ? 'dark' : 'light',
-          density: remote.density || 'comfortable',
-          language: remote.language || 'en',
-          timeFormat: remote.timeFormat || '12h',
-          sidebarBehavior: remote.sidebarBehavior || 'expanded',
-          accentColor: remote.accentColor || '#667eea',
-          practiceName: remote.practiceName || 'Therapy',
-        };
-        setSettings(merged);
-        setDraftSettings(merged);
-        saveSiteSettings(merged);
-        window.dispatchEvent(new CustomEvent('site-settings-updated'));
-      } catch (err) {
-        console.error('Failed to load settings from backend', err);
-      }
-    };
-
-    loadRemoteSettings();
-  }, []);
 
   useEffect(() => {
     setDraftSettings(settings);
@@ -70,11 +50,11 @@ export default function Settings() {
     const hasToken = !!localStorage.getItem('authToken');
     if (!hasToken) return;
 
-    const loadServerSettings = async () => {
+    const loadServerData = async () => {
       try {
         const serverSettings: any = await api.getSettings();
         const normalized: SiteSettings = {
-          themeMode: serverSettings.themeMode || serverSettings.theme || 'system',
+          themeMode: serverSettings.themeMode || serverSettings.theme || settings.themeMode || 'system',
           density: serverSettings.density || 'comfortable',
           sidebarBehavior: serverSettings.sidebarBehavior || 'expanded',
           language: serverSettings.language || 'en',
@@ -89,9 +69,19 @@ export default function Settings() {
       } catch (err) {
         console.error('Failed to load server settings, using local settings.', err);
       }
+
+      try {
+        const me: any = await api.getCurrentUser();
+        setAccountInfo({
+          username: me?.username || me?.fullName || me?.name || '',
+          email: me?.email || '',
+        });
+      } catch (err) {
+        console.error('Failed to load account details for settings page.', err);
+      }
     };
 
-    loadServerSettings();
+    loadServerData();
   }, []);
 
   function markSaved() {
@@ -134,20 +124,6 @@ export default function Settings() {
     setSettings(merged);
     setDraftSettings(merged);
     saveSiteSettings(merged);
-
-    if (localStorage.getItem('authToken')) {
-      api.updateSettings({
-        theme: merged.themeMode === 'dark' ? 'dark' : 'light',
-        density: merged.density,
-        language: merged.language,
-        timeFormat: merged.timeFormat,
-        sidebarBehavior: merged.sidebarBehavior,
-        accentColor: merged.accentColor,
-        practiceName: merged.practiceName,
-      }).catch((err) => {
-        console.error('Failed to save settings to backend', err);
-      });
-    }
 
     window.dispatchEvent(new CustomEvent('site-settings-updated'));
     setHasPendingChanges(false);
@@ -217,6 +193,27 @@ export default function Settings() {
       </div>
 
       <div className="settings-container">
+        <div className="settings-section">
+          <h3>Account</h3>
+          <p className="settings-section-desc">Your registered account details</p>
+
+          <div className="setting-row">
+            <div>
+              <p className="setting-title">Username</p>
+              <p className="setting-desc">Name on your account profile</p>
+            </div>
+            <div className="setting-static">{accountInfo.username || 'Not available'}</div>
+          </div>
+
+          <div className="setting-row">
+            <div>
+              <p className="setting-title">Email</p>
+              <p className="setting-desc">Registered login email</p>
+            </div>
+            <div className="setting-static">{accountInfo.email || 'Not available'}</div>
+          </div>
+        </div>
+
         <div className="settings-section">
           <h3>Appearance</h3>
           <p className="settings-section-desc">Control how the website looks and feels</p>

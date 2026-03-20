@@ -9,6 +9,7 @@ export interface SessionRecord {
 
 export interface Client {
     _id: string;
+    id?: string;
     clientId: string;
     name: string;
     email: string;
@@ -22,11 +23,12 @@ export interface Client {
     chiefComplaints: string;
     hopi: string;
     sessionHistory: SessionRecord[];
-    createdAt: number;
+    createdAt?: number | string;
 }
 
 export interface DeletedClient {
     _id: string;
+    id?: string;
     clientId: string;
     name: string;
     email: string;
@@ -48,6 +50,7 @@ export function generateClientId(): string {
 
 export interface Appointment {
     _id: string;
+    id?: string;
     clientName: string;
     clientAge?: number;
     dateTime: number;

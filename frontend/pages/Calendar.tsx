@@ -9,7 +9,8 @@ import * as api from '../utils/api';
 import '../styles/calendar.css';
 
 interface Appointment {
-  _id: string;
+  _id?: string;
+  id?: string;
   clientName: string;
   clientAge?: number;
   dateTime: number;
@@ -19,7 +20,8 @@ interface Appointment {
 }
 
 interface Client {
-  id: string;
+  id?: string;
+  _id?: string;
   name: string;
   age?: number;
   sessionHistory?: SessionRecord[];
@@ -181,7 +183,7 @@ export default function Calendar() {
   const allEvents = useMemo<CalendarEvent[]>(() => {
     const apptEvents: CalendarEvent[] = appointments.map((a) => ({
       _id: a._id,
-      id: a.id,
+      id: a.id || a._id || `appt-${a.dateTime}`,
       clientName: a.clientName,
       clientAge: a.clientAge,
       dateTime: a.dateTime,

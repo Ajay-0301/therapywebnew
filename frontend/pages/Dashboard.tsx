@@ -11,7 +11,8 @@ import * as api from '../utils/api';
 import '../styles/dashboard.css';
 
 interface Appointment {
-  _id: string;
+  _id?: string;
+  id?: string;
   clientName: string;
   clientAge?: number;
   dateTime: number;
@@ -74,9 +75,9 @@ export default function Dashboard() {
           api.getAppointments(),
           api.getDeletedClients(),
         ]);
-        console.log('Dashboard: Clients loaded:', clientsData?.length);
-        console.log('Dashboard: Appointments loaded:', appointmentsData?.length);
-        console.log('Dashboard: Deleted clients loaded:', deletedClientsData?.length);
+        console.log('Dashboard: Clients loaded:', Array.isArray(clientsData) ? clientsData.length : 0);
+        console.log('Dashboard: Appointments loaded:', Array.isArray(appointmentsData) ? appointmentsData.length : 0);
+        console.log('Dashboard: Deleted clients loaded:', Array.isArray(deletedClientsData) ? deletedClientsData.length : 0);
         console.log('Dashboard: Appointments data:', appointmentsData);
         console.log('Dashboard: Deleted clients data:', deletedClientsData);
         
@@ -173,14 +174,18 @@ export default function Dashboard() {
 
   const completedClients = clients
     .filter((c: Client) => c.status === 'completed')
-    .sort((a: Client, b: Client) => (b.createdAt || 0) - (a.createdAt || 0));
+    .sort((a: Client, b: Client) => {
+      const aTs = typeof a.createdAt === 'string' ? new Date(a.createdAt).getTime() : (a.createdAt || 0);
+      const bTs = typeof b.createdAt === 'string' ? new Date(b.createdAt).getTime() : (b.createdAt || 0);
+      return bTs - aTs;
+    });
   const completedCases = completedClients.length;
   const activeCases = clients.filter((c: Client) => c.status === 'active').length;
 
   // Find client ID for an appointment by name match
   function findClientId(name: string): string | undefined {
     const c = clients.find((cl) => cl.name === name);
-    return c?.id;
+    return c?._id || c?.id;
   }
 
   // Delete a completed client
@@ -207,7 +212,7 @@ export default function Dashboard() {
   // Delete a follow-up session record
   async function handleDeleteFollowUp(clientId: string, recordId: string) {
     console.log('Dashboard: Deleting follow-up - clientId:', clientId, 'recordId:', recordId);
-    const client = clients.find(c => c.id === clientId || (c as any)._id === clientId);
+    const client = clients.find(c => c._id === clientId || c.id === clientId);
     if (client) {
       const updatedClient = {
         ...client,
@@ -537,7 +542,7 @@ export default function Dashboard() {
             ) : (
               upcomingAppointments.slice(0, 5).map((appt) => {
                 const cId = findClientId(appt.clientName);
-                const client = clients.find(c => c.id === cId);
+                const client = clients.find(c => c._id === cId || c.id === cId);
                 return (
                   <div
                     key={appt._id}
@@ -564,7 +569,9 @@ export default function Dashboard() {
                       className="box-item-delete"
                       onClick={(e) => {
                         e.stopPropagation();
-                        deleteAppointment(appt._id || appt.id);
+                        const appointmentId = appt._id || appt.id;
+                        if (!appointmentId) return;
+                        deleteAppointment(appointmentId);
                         setRefreshKey(prev => prev + 1);
                       }}
                       title="Delete appointment"
@@ -606,7 +613,7 @@ export default function Dashboard() {
               </div>
             ) : (
               upcomingFollowUps.slice(0, 5).map((fu) => {
-                const client = clients.find(c => c.id === fu.clientId);
+                const client = clients.find(c => c._id === fu.clientId || c.id === fu.clientId);
                 return (
                   <div
                     key={fu.id}

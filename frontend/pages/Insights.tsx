@@ -120,7 +120,7 @@ export default function Insights() {
   
   // Filter clients added this month
   const clientsAddedThisMonth = clients.filter(c => {
-    const createdDate = new Date(c.createdAt);
+    const createdDate = new Date(c.createdAt ?? Date.now());
     return createdDate.getMonth() === selectedMonth && createdDate.getFullYear() === selectedYear;
   });
   

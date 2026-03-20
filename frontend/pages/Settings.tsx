@@ -73,7 +73,7 @@ export default function Settings() {
       try {
         const me: any = await api.getCurrentUser();
         setAccountInfo({
-          username: me?.username || me?.fullName || me?.name || '',
+          username: me?.fullName || me?.name || me?.username || '',
           email: me?.email || '',
         });
       } catch (err) {

@@ -23,7 +23,7 @@ exports.getAppointmentById = async (req, res) => {
 
 exports.createAppointment = async (req, res) => {
   try {
-    const { clientId, clientName, type, dateTime, location, notes, status } = req.body;
+    const { clientId, clientName, clientAge, duration, type, dateTime, location, notes, status } = req.body;
 
     if (!dateTime) {
       return res.status(400).json({ message: 'dateTime is required' });
@@ -35,9 +35,11 @@ exports.createAppointment = async (req, res) => {
 
     const appointment = new Appointment({
       userId: req.user.id,
-      id: new Date().getTime().toString(),
-      clientId: clientId || null, // Optional: can be null if not provided
+      username: req.user.username,
+      clientId: clientId || null,
       clientName,
+      clientAge: clientAge || null,
+      duration: duration || 60,
       type,
       dateTime: new Date(dateTime),
       location,
@@ -54,12 +56,15 @@ exports.createAppointment = async (req, res) => {
 
 exports.updateAppointment = async (req, res) => {
   try {
-    const { clientName, type, dateTime, location, notes, status } = req.body;
+    const { clientName, clientAge, duration, type, dateTime, location, notes, status } = req.body;
 
     const appointment = await Appointment.findOneAndUpdate(
       { _id: req.params.id, userId: req.user.id },
       {
+        username: req.user.username,
         clientName,
+        clientAge,
+        duration: duration || 60,
         type,
         dateTime: new Date(dateTime),
         location,

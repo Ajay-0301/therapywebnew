@@ -17,7 +17,11 @@ const ClientSchema = new mongoose.Schema({
     required: true,
     index: true,
   },
-  id: String,
+  username: {
+    type: String,
+    required: true,
+    index: true,
+  },
   clientId: {
     type: String,
     required: true,

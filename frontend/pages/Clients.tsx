@@ -189,7 +189,7 @@ export default function Clients() {
     const normalizedId = clientId.trim().toUpperCase();
     setClientId(normalizedId);
     // validate clientId uniqueness
-    const dup = clients.find((c) => c.clientId.toUpperCase() === normalizedId && c.id !== editingClient?.id);
+    const dup = clients.find((c) => c.clientId.toUpperCase() === normalizedId && c._id !== editingClient?._id);
     if (dup) {
       setClientIdError('This Client ID is already used. Choose another.');
       setClientIdValid(false);
@@ -210,14 +210,14 @@ export default function Clients() {
             relationshipStatus,
             age,
           };
-          await api.updateClient((editingClient as any)._id || editingClient.id, updated);
+          await api.updateClient(editingClient._id, updated);
           // Reload clients
           const data = await api.getClients();
           setClients(Array.isArray(data) ? data : []);
           setModalOpen(false);
           // Broadcast change to other components
           window.dispatchEvent(new CustomEvent('clientDataUpdated'));
-          navigate(`/clients/${(editingClient as any)._id || editingClient.id}`);
+          navigate(`/clients/${editingClient._id}`);
         } else {
           const newClientData = {
             clientId: normalizedId,
@@ -277,9 +277,13 @@ export default function Clients() {
   }
 
   function handleDelete(id: string) {
-    const client = clients.find((c) => c.id === id);
-    if (!client) return;
+    const client = clients.find((c) => c._id === id);
+    if (!client) {
+      console.error('Client not found for deletion');
+      return;
+    }
     
+    console.log('Clients: Opening delete confirmation for client:', client.name);
     // Show custom confirmation modal instead of window.confirm
     setDeleteConfirm({
       open: true,
@@ -293,13 +297,19 @@ export default function Clients() {
     if (!open || !clientId) return;
 
     try {
+      console.log('Clients: Deleting client with ID:', clientId);
       await api.deleteClient(clientId);
+      console.log('Clients: Delete API call successful');
+      
       // Reload clients
       const data = await api.getClients();
-      setClients(Array.isArray(data) ? data : []);
+      const clientsArray = Array.isArray(data) ? data : [];
+      console.log('Clients: Reloaded clients after delete:', clientsArray.length);
+      setClients(clientsArray);
       setDeleteConfirm({ open: false, clientId: '', clientName: '' });
       
       // Broadcast change to other components (Dashboard, Calendar, etc)
+      console.log('Clients: Broadcasting clientDataUpdated event');
       window.dispatchEvent(new CustomEvent('clientDataUpdated'));
     } catch (err) {
       console.error('Failed to delete client:', err);
@@ -385,7 +395,7 @@ export default function Clients() {
           </div>
         ) : (
           filtered.map((c) => (
-            <div key={c.id} className="client-card" onClick={() => navigate(`/clients/${(c as any)._id || c.id}`)}>
+            <div key={c._id} className="client-card" onClick={() => navigate(`/clients/${c._id}`)}>
               <div className="client-card-top">
                 <div className="client-avatar">
                   {(c.name || 'U').charAt(0).toUpperCase()}
@@ -421,7 +431,7 @@ export default function Clients() {
                 className="btn-delete-client"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleDelete(c.id);
+                  handleDelete(c._id);
                 }}
                 title="Delete client"
               >
@@ -464,7 +474,7 @@ export default function Clients() {
                         setSuggestedId('');
                         return;
                       }
-                      const dupLive = clients.find((c) => c.clientId.toUpperCase() === norm && c.id !== editingClient?.id);
+                      const dupLive = clients.find((c) => c.clientId.toUpperCase() === norm && c._id !== editingClient?._id);
                       if (dupLive) {
                         setClientIdValid(false);
                         setSuggestedId(generateClientId());

@@ -59,13 +59,33 @@
     opacity: 0;
     transform: translateY(-4px);
     transition: var(--transition);
-    align-self: flex-start;
     border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .settings-saved.is-visible {
     opacity: 1;
     transform: translateY(0);
+}
+
+.settings-header-controls {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    align-self: center;
+}
+
+.settings-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.settings-actions .btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
 
 .setting-row {
@@ -253,9 +273,24 @@
     font-weight: 700;
 }
 
-/* ========================================================================
-   Tablet (481px - 768px)
-   ======================================================================== */
+/* iPad / Medium Tablet (641px - 768px) */
+@media (max-width: 768px) and (min-width: 641px) {
+    .settings-section {
+        padding: 20px;
+        margin-bottom: 16px;
+    }
+    .setting-row {
+        flex-direction: row;
+        align-items: center;
+        gap: 16px;
+    }
+    .select-field {
+        width: 100%;
+        max-width: 300px;
+    }
+}
+
+/* Tablet (481px - 768px) */
 @media (max-width: 768px) {
     .settings-section {
         padding: 18px;
@@ -267,6 +302,18 @@
     }
     .select-field {
         width: 100%;
+    }
+    .settings-header-controls {
+        margin-left: 0;
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        align-self: stretch;
+    }
+
+    .settings-actions {
+        width: 100%;
+        justify-content: flex-start;
     }
 }
 
@@ -299,6 +346,15 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
+    }
+    .settings-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+    .settings-actions .btn {
+        width: 100%;
     }
 }
 

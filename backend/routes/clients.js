@@ -4,6 +4,7 @@ const authMiddleware = require('../middleware/auth');
 
 router.get('/', authMiddleware, clientController.getAllClients);
 router.get('/deleted', authMiddleware, clientController.getDeletedClients);
+router.post('/deleted/:id/restore', authMiddleware, clientController.restoreDeletedClient);
 router.delete('/deleted/:id', authMiddleware, clientController.deleteDeletedClient);
 router.get('/:id', authMiddleware, clientController.getClientById);
 router.post('/', authMiddleware, clientController.createClient);

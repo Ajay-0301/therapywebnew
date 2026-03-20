@@ -64,14 +64,19 @@ export default function Login() {
 
         try {
             const response = await api.login(loginEmail, loginPassword);
-            const userData = { 
-                email: response.user.email, 
-                name: response.user.name, 
-                id: response.user.id,
-                registeredAt: new Date().toISOString() 
-            };
-            saveUserData(userData);
-            navigate('/dashboard');
+            if (response?.user) {
+                const userData = { 
+                    email: response.user.email, 
+                    name: response.user.name, 
+                    avatar: response.user.avatar || '',
+                    id: response.user.id,
+                    registeredAt: new Date().toISOString() 
+                };
+                saveUserData(userData);
+                navigate('/dashboard');
+            } else {
+                setError('Login response invalid. Please try again.');
+            }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Login failed. Please check your credentials.');
         }
@@ -96,14 +101,19 @@ export default function Login() {
 
         try {
             const response = await api.register(regEmail, regPassword, regName);
-            const userData = { 
-                email: response.user.email, 
-                name: response.user.name,
-                id: response.user.id,
-                registeredAt: new Date().toISOString() 
-            };
-            saveUserData(userData);
-            navigate('/dashboard');
+            if (response?.user) {
+                const userData = { 
+                    email: response.user.email, 
+                    name: response.user.name,
+                    avatar: response.user.avatar || '',
+                    id: response.user.id,
+                    registeredAt: new Date().toISOString() 
+                };
+                saveUserData(userData);
+                navigate('/dashboard');
+            } else {
+                setError('Registration response invalid. Please try again.');
+            }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Registration failed. Please try again.');
         }

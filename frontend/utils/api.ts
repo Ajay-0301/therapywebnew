@@ -91,7 +91,16 @@ export async function apiRequest<T>(
 
 interface AuthResponse {
   token: string;
-  user?: { id: string; email: string; name: string };
+  user?: { id: string; email: string; name: string; avatar?: string };
+}
+
+interface CurrentUserResponse {
+  _id?: string;
+  id?: string;
+  email: string;
+  fullName?: string;
+  name?: string;
+  avatar?: string;
 }
 
 export async function register(email: string, password: string, name: string) {
@@ -108,6 +117,14 @@ export async function login(email: string, password: string) {
     setAuthToken(response.token);
   }
   return response;
+}
+
+export async function getCurrentUser() {
+  return apiRequest<CurrentUserResponse>('/auth/me', 'GET');
+}
+
+export async function updateCurrentUser(profile: { name?: string; avatar?: string }) {
+  return apiRequest<{ message: string; user: { id: string; email: string; name: string; avatar?: string } }>('/auth/me', 'PUT', profile);
 }
 
 export function logout(): void {
@@ -139,6 +156,10 @@ export async function getDeletedClients() {
   return apiRequest('/clients/deleted', 'GET');
 }
 
+export async function restoreDeletedClient(id: string) {
+  return apiRequest(`/clients/deleted/${id}/restore`, 'POST');
+}
+
 // ========================================
 // APPOINTMENT API
 // ========================================
@@ -168,7 +189,8 @@ export async function getEarnings() {
 }
 
 export async function saveEarnings(earningsData: unknown) {
-  return apiRequest('/earnings', 'POST', earningsData);
+  // Call the save-all endpoint which handles arrays
+  return apiRequest('/earnings/save-all', 'POST', { earnings: earningsData });
 }
 
 // ========================================

@@ -58,7 +58,8 @@
 .year-picker-dropdown {
     position: absolute;
     top: 100%;
-    left: 160px;
+    left: auto;
+    right: 0;
     margin-top: 8px;
     background: white;
     border: 1px solid rgba(102, 126, 234, 0.2);
@@ -68,6 +69,31 @@
     min-width: 200px;
     padding: 12px;
     animation: slideDown 0.2s ease;
+}
+
+@media (max-width: 768px) {
+    .month-picker-dropdown,
+    .year-picker-dropdown {
+        left: 0;
+        right: auto;
+        min-width: auto;
+        max-width: calc(100vw - 32px);
+    }
+}
+
+.year-picker-dropdown {
+    left: auto;
+    right: 0;
+}
+
+@media (max-width: 768px) {
+    .month-picker-dropdown,
+    .year-picker-dropdown {
+        left: 0;
+        right: auto;
+        min-width: auto;
+        max-width: calc(100vw - 32px);
+    }
 }
 
 @keyframes slideDown {
@@ -798,9 +824,7 @@
     padding: 16px;
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
     border-radius: 12px;
-    margin: 0 -16px;
-    margin-left: -16px;
-    margin-right: -16px;
+    margin: 0;
     border: 1px solid rgba(102, 126, 234, 0.2);
 }
 
@@ -1139,7 +1163,41 @@
     color: #667eea;
 }
 
-@media (max-width: 768px) {
+/* iPad / Medium Tablet (641px - 768px) */
+@media (max-width: 768px) and (min-width: 641px) {
+    .month-selector-btn {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+
+    .month-picker-dropdown {
+        min-width: 260px;
+        padding: 12px;
+    }
+
+    .year-picker-dropdown {
+        min-width: 180px;
+    }
+
+    .visualization-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .insights-summary {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .earnings-form-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .earnings-table {
+        margin-top: 16px;
+    }
+}
+
+@media (max-width: 640px) {
     .month-selector-btn {
         padding: 8px 12px;
         font-size: 13px;
@@ -1520,9 +1578,115 @@
     }
 
     .earnings-list {
-        margin-left: -12px;
-        margin-right: -12px;
+        margin-left: 0;
+        margin-right: 0;
         padding: 12px;
+    }
+}
+
+/* ========================================================================
+   FINAL RESPONSIVE ALIGNMENT FIXES
+   ======================================================================== */
+
+.insights-page {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.insights-page .visualization-section,
+.insights-page .viz-card,
+.insights-page .viz-chart,
+.insights-page .earnings-chart,
+.insights-page .earnings-form,
+.insights-page .insights-summary {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.insights-page .earnings-bars {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+@media (max-width: 1024px) {
+    .insights-page .visualization-section {
+        padding: 24px;
+    }
+
+    .insights-page .visualization-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .insights-page .insights-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .insights-page .visualization-section {
+        padding: 16px;
+    }
+
+    .insights-page .insights-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .insights-page .earnings-form-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .insights-page .add-btn {
+        grid-column: auto;
+        width: 100%;
+    }
+
+    .insights-page .clients-added-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .insights-page .clients-added-stats {
+        width: 100%;
+    }
+
+    .insights-page .client-status-summary,
+    .insights-page .sessions-summary-section,
+    .insights-page .age-stats-summary {
+        grid-template-columns: 1fr;
+        display: grid;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .insights-page .viz-card {
+        padding: 16px;
+    }
+
+    .insights-page .bar-chart {
+        gap: 10px;
+        height: 150px;
+    }
+
+    .insights-page .bar {
+        width: 34px;
+    }
+
+    .insights-page .age-bars-container {
+        gap: 8px;
+        padding: 14px 10px;
+        height: 170px;
+    }
+
+    .insights-page .age-bar-vertical {
+        min-width: 20px;
+        max-width: 30px;
     }
 }
 

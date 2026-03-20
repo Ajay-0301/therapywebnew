@@ -293,6 +293,25 @@
     }
 }
 
+/* iPad / Medium Tablet (641px - 768px) */
+@media (max-width: 768px) and (min-width: 641px) {
+    .container {
+        grid-template-columns: 1fr;
+        max-width: 100%;
+        min-height: auto;
+        width: 100%;
+    }
+    .left-section {
+        display: none;
+    }
+    .right-section {
+        padding: 35px 30px;
+    }
+    .form-wrapper h2 {
+        font-size: 24px;
+    }
+}
+
 /* Tablet (481px - 768px) */
 @media (max-width: 768px) and (min-width: 481px) {
     .container {
@@ -314,8 +333,8 @@
     }
 }
 
-/* Mobile (361px - 480px) */
-@media (max-width: 480px) and (min-width: 361px) {
+/* Mobile (up to 480px) */
+@media (max-width: 480px) {
     .container {
         grid-template-columns: 1fr;
         max-width: 100%;
@@ -357,8 +376,8 @@
     }
 }
 
-/* Extra Small Mobile (< 360px) */
-@media (max-width: 359px) {
+/* Extra Small Mobile (up to 360px) */
+@media (max-width: 360px) {
     .auth-page {
         padding: 10px;
     }

@@ -1029,7 +1029,32 @@ body.dark-mode .empty-state-subtext {
    RESPONSIVE STYLES FOR MOBILE & TABLET
    ======================================================================== */
 
-@media (max-width: 768px) {
+/* iPad / Medium Tablet (641px - 768px) */
+@media (max-width: 768px) and (min-width: 641px) {
+    .clients-filters {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .search-wrapper {
+        flex: 1;
+        min-width: 280px;
+    }
+
+    .status-tabs {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .clients-list {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+}
+
+@media (max-width: 640px) {
     .clients-filters {
         flex-direction: column;
         gap: 12px;
@@ -1041,9 +1066,10 @@ body.dark-mode .empty-state-subtext {
 
     .status-tabs {
         flex-wrap: wrap;
+        width: 100%;
     }
 
-    .client-grid {
+    .clients-list {
         grid-template-columns: 1fr;
         gap: 12px;
     }
@@ -1076,24 +1102,20 @@ body.dark-mode .empty-state-subtext {
         width: 100%;
     }
 
-    .tab-btn {
+    .status-tab {
         padding: 6px 12px;
         font-size: 12px;
         flex: 1;
         min-width: 100px;
     }
 
-    .client-grid {
+    .clients-list {
         grid-template-columns: 1fr;
         gap: 10px;
     }
 
     .client-card {
-        padding: 14px;
-    }
-
-    .client-header {
-        gap: 10px;
+        border-radius: 18px;
     }
 
     .client-avatar {
@@ -1102,18 +1124,14 @@ body.dark-mode .empty-state-subtext {
         font-size: 14px;
     }
 
-    .client-info h3 {
-        font-size: 14px;
+    .client-name {
+        font-size: 15px;
+        margin-left: 12px;
     }
 
-    .client-info p {
+    .client-info {
         font-size: 11px;
-    }
-
-    .client-menu {
-        width: 28px;
-        height: 28px;
-        font-size: 16px;
+        margin-left: 4px;
     }
 
     .btn {

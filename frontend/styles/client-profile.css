@@ -157,25 +157,7 @@
 .profile-actions {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-}
-
-.btn-save-info {
-    padding: 8px 14px;
-    border-radius: 10px;
-    border: none;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    color: white;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
-    transition: var(--transition);
-}
-
-.btn-save-info:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(102, 126, 234, 0.35);
+    gap: 12px;
 }
 
 .profile-card-header h3 {
@@ -186,41 +168,65 @@
 }
 
 .btn-edit {
-    width: 36px;
-    height: 36px;
-    border: none;
-    background: none;
-    color: var(--text-tertiary);
+    padding: 10px 14px;
+    height: auto;
+    min-width: 44px;
+    border: 1.5px solid rgba(102, 126, 234, 0.25);
+    background: rgba(102, 126, 234, 0.05);
+    color: var(--primary);
     cursor: pointer;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
     transition: var(--transition);
 }
 
 .btn-edit:hover {
-    background: rgba(102, 126, 234, 0.08);
+    background: rgba(102, 126, 234, 0.12);
     color: var(--primary);
+    border-color: rgba(102, 126, 234, 0.4);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+    transform: translateY(-1px);
+}
+
+.btn-edit svg {
+    width: 16px;
+    height: 16px;
 }
 
 .btn-delete {
-    width: 36px;
-    height: 36px;
-    border: none;
-    background: none;
-    color: var(--text-tertiary);
+    padding: 10px 14px;
+    height: auto;
+    min-width: 44px;
+    border: 1.5px solid rgba(239, 68, 68, 0.25);
+    background: rgba(239, 68, 68, 0.05);
+    color: #ef4444;
     cursor: pointer;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
     transition: var(--transition);
 }
 
 .btn-delete:hover {
-    background: rgba(239, 68, 68, 0.1);
+    background: rgba(239, 68, 68, 0.12);
     color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.4);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15);
+    transform: translateY(-1px);
+}
+
+.btn-delete svg {
+    width: 16px;
+    height: 16px;
 }
 
 /* ========================================================================
@@ -234,9 +240,36 @@
     margin-bottom: 24px;
 }
 
-/* ========================================================================
-   Tablet (481px - 768px)
-   ======================================================================== */
+/* iPad / Medium Tablet (641px - 768px) */
+@media (max-width: 768px) and (min-width: 641px) {
+    .field-box-grid {
+        grid-template-columns: 1fr;
+    }
+    .profile-header {
+        padding: 24px 20px;
+    }
+    .profile-card {
+        padding: 20px;
+    }
+    .session-controls {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .profile-header-text h2 {
+        font-size: 28px;
+    }
+    .profile-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .profile-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+/* Tablet (481px - 768px) */
 @media (max-width: 768px) {
     .field-box-grid {
         grid-template-columns: 1fr;
@@ -982,18 +1015,32 @@ body.dark-mode .profile-card-header h3 {
     color: #f1f5f9;
 }
 
-body.dark-mode .btn-save-info {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-body.dark-mode .btn-save-info:hover {
-    box-shadow: 0 6px 18px rgba(102, 126, 234, 0.4);
-}
-
 body.dark-mode .btn-edit {
-    color: #cbd5e1;
+    color: #a5d6ff;
+    background: rgba(102, 126, 234, 0.1);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+body.dark-mode .btn-edit:hover {
+    background: rgba(102, 126, 234, 0.15);
+    color: #a5d6ff;
+    border-color: rgba(102, 126, 234, 0.5);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25);
+    transform: translateY(-1px);
+}
+
+body.dark-mode .btn-delete {
+    color: #fca5a5;
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+body.dark-mode .btn-delete:hover {
+    background: rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
+    border-color: rgba(239, 68, 68, 0.5);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
+    transform: translateY(-1px);
 }
 
 body.dark-mode .btn-edit:hover {

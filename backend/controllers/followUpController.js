@@ -47,6 +47,7 @@ exports.createFollowUp = async (req, res) => {
 
     const followUp = new FollowUp({
       userId: req.user.id,
+      username: req.user.username,
       clientId,
       clientName,
       sessionId,
@@ -69,6 +70,7 @@ exports.updateFollowUp = async (req, res) => {
     const followUp = await FollowUp.findOneAndUpdate(
       { _id: req.params.id, userId: req.user.id },
       {
+        username: req.user.username,
         clientId,
         clientName,
         followUpDate,
@@ -111,6 +113,7 @@ exports.markFollowUpComplete = async (req, res) => {
     const followUp = await FollowUp.findOneAndUpdate(
       { _id: req.params.id, userId: req.user.id },
       {
+        username: req.user.username,
         status: 'completed',
         completionDate: new Date(),
         completionNotes,

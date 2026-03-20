@@ -7,12 +7,21 @@ const AppointmentSchema = new mongoose.Schema({
     required: true,
     index: true,
   },
-  id: String,
+  username: {
+    type: String,
+    required: true,
+    index: true,
+  },
   clientId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Client',
   },
   clientName: String,
+  clientAge: Number,
+  duration: {
+    type: Number,
+    default: 60,
+  },
   type: String,
   dateTime: Date,
   location: String,

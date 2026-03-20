@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { applySiteSettings, resolveThemeMode } from '../utils/sitePreferences';
+import * as api from '../utils/api';
 import {
   getSiteSettings,
   saveSiteSettings,
@@ -18,11 +19,45 @@ const languageOptions: Array<{ value: SiteSettings['language']; label: string; l
 
 export default function Settings() {
   const [settings, setSettings] = useState<SiteSettings>(() => getSiteSettings());
+  const [draftSettings, setDraftSettings] = useState<SiteSettings>(() => getSiteSettings());
   const [saved, setSaved] = useState(false);
+  const [hasPendingChanges, setHasPendingChanges] = useState(false);
   const saveTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     applySiteSettings(settings);
+  }, [settings]);
+
+  useEffect(() => {
+    const hasToken = !!localStorage.getItem('authToken');
+    if (!hasToken) return;
+
+    const loadRemoteSettings = async () => {
+      try {
+        const remote = await api.getSettings() as any;
+        const merged: SiteSettings = {
+          themeMode: remote.theme === 'dark' ? 'dark' : 'light',
+          density: remote.density || 'comfortable',
+          language: remote.language || 'en',
+          timeFormat: remote.timeFormat || '12h',
+          sidebarBehavior: remote.sidebarBehavior || 'expanded',
+          accentColor: remote.accentColor || '#667eea',
+          practiceName: remote.practiceName || 'Therapy',
+        };
+        setSettings(merged);
+        setDraftSettings(merged);
+        saveSiteSettings(merged);
+        window.dispatchEvent(new CustomEvent('site-settings-updated'));
+      } catch (err) {
+        console.error('Failed to load settings from backend', err);
+      }
+    };
+
+    loadRemoteSettings();
+  }, []);
+
+  useEffect(() => {
+    setDraftSettings(settings);
   }, [settings]);
 
   useEffect(() => {
@@ -31,31 +66,110 @@ export default function Settings() {
     };
   }, []);
 
+  useEffect(() => {
+    const hasToken = !!localStorage.getItem('authToken');
+    if (!hasToken) return;
+
+    const loadServerSettings = async () => {
+      try {
+        const serverSettings: any = await api.getSettings();
+        const normalized: SiteSettings = {
+          themeMode: serverSettings.themeMode || serverSettings.theme || 'system',
+          density: serverSettings.density || 'comfortable',
+          sidebarBehavior: serverSettings.sidebarBehavior || 'expanded',
+          language: serverSettings.language || 'en',
+          timeFormat: serverSettings.timeFormat || '12h',
+          accentColor: serverSettings.accentColor || '#667eea',
+          practiceName: serverSettings.practiceName || 'Therapy',
+        };
+        setSettings(normalized);
+        setDraftSettings(normalized);
+        saveSiteSettings(normalized);
+        window.dispatchEvent(new CustomEvent('site-settings-updated'));
+      } catch (err) {
+        console.error('Failed to load server settings, using local settings.', err);
+      }
+    };
+
+    loadServerSettings();
+  }, []);
+
   function markSaved() {
     setSaved(true);
     if (saveTimeoutRef.current !== null) window.clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = window.setTimeout(() => setSaved(false), 2000);
   }
 
-  function updateSettings(next: Partial<SiteSettings>) {
-    const merged = { ...settings, ...next };
+  function updateDraft(next: Partial<SiteSettings>) {
+    const merged = { ...draftSettings, ...next };
+    setDraftSettings(merged);
+    setHasPendingChanges(true);
+  }
+
+  async function saveChanges() {
+    const normalizedPracticeName = (draftSettings.practiceName || '').trim();
+    const merged = {
+      ...draftSettings,
+      practiceName: normalizedPracticeName || 'Therapy'
+    };
+
+    const hasToken = !!localStorage.getItem('authToken');
+    if (hasToken) {
+      try {
+        await api.updateSettings({
+          themeMode: merged.themeMode,
+          theme: merged.themeMode,
+          density: merged.density,
+          sidebarBehavior: merged.sidebarBehavior,
+          language: merged.language,
+          timeFormat: merged.timeFormat,
+          accentColor: merged.accentColor,
+          practiceName: merged.practiceName,
+        });
+      } catch (err) {
+        console.error('Failed to save settings to server, using local save.', err);
+      }
+    }
+
     setSettings(merged);
+    setDraftSettings(merged);
     saveSiteSettings(merged);
+
+    if (localStorage.getItem('authToken')) {
+      api.updateSettings({
+        theme: merged.themeMode === 'dark' ? 'dark' : 'light',
+        density: merged.density,
+        language: merged.language,
+        timeFormat: merged.timeFormat,
+        sidebarBehavior: merged.sidebarBehavior,
+        accentColor: merged.accentColor,
+        practiceName: merged.practiceName,
+      }).catch((err) => {
+        console.error('Failed to save settings to backend', err);
+      });
+    }
+
     window.dispatchEvent(new CustomEvent('site-settings-updated'));
+    setHasPendingChanges(false);
     markSaved();
+  }
+
+  function discardChanges() {
+    setDraftSettings(settings);
+    setHasPendingChanges(false);
   }
 
   const resolvedTheme = resolveThemeMode(settings);
   const languageOption = languageOptions.find((option) => option.value === settings.language);
   const languageLocale = languageOption?.locale || 'en-US';
-  const accentColorValue = /^#([0-9a-fA-F]{6})$/.test(settings.accentColor) ? settings.accentColor : '#667eea';
+  const accentColorValue = /^#([0-9a-fA-F]{6})$/.test(draftSettings.accentColor) ? draftSettings.accentColor : '#667eea';
   const previewTime = useMemo(() => {
     return new Intl.DateTimeFormat(languageLocale, {
       hour: 'numeric',
       minute: '2-digit',
-      hour12: settings.timeFormat === '12h'
+      hour12: draftSettings.timeFormat === '12h'
     }).format(new Date());
-  }, [languageLocale, settings.timeFormat]);
+  }, [languageLocale, draftSettings.timeFormat]);
 
   return (
     <section className="page active">
@@ -77,8 +191,28 @@ export default function Settings() {
           <h2>Settings</h2>
           <p className="page-subtitle">Website preferences and display options</p>
         </div>
-        <div className={`settings-saved ${saved ? 'is-visible' : ''}`} aria-live="polite">
-          Saved
+        <div className="settings-header-controls">
+          <div className={`settings-saved ${saved ? 'is-visible' : ''}`} aria-live="polite">
+            Saved
+          </div>
+          <div className="settings-actions">
+            <button
+              className="btn btn-secondary"
+              type="button"
+              onClick={discardChanges}
+              disabled={!hasPendingChanges}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-primary"
+              type="button"
+              onClick={saveChanges}
+              disabled={!hasPendingChanges}
+            >
+              Save
+            </button>
+          </div>
         </div>
       </div>
 
@@ -97,8 +231,8 @@ export default function Settings() {
                 <button
                   key={mode}
                   type="button"
-                  className={`segmented-btn ${settings.themeMode === mode ? 'active' : ''}`}
-                  onClick={() => updateSettings({ themeMode: mode })}
+                  className={`segmented-btn ${draftSettings.themeMode === mode ? 'active' : ''}`}
+                  onClick={() => updateDraft({ themeMode: mode })}
                 >
                   {mode.charAt(0).toUpperCase() + mode.slice(1)}
                 </button>
@@ -117,9 +251,9 @@ export default function Settings() {
                   <button
                     key={color}
                     type="button"
-                    className={`color-swatch ${settings.accentColor.toLowerCase() === color ? 'active' : ''}`}
+                    className={`color-swatch ${draftSettings.accentColor.toLowerCase() === color ? 'active' : ''}`}
                     style={{ backgroundColor: color }}
-                    onClick={() => updateSettings({ accentColor: color })}
+                    onClick={() => updateDraft({ accentColor: color })}
                     aria-label={`Set accent color to ${color}`}
                   />
                 ))}
@@ -128,7 +262,7 @@ export default function Settings() {
                 type="color"
                 className="color-input"
                 value={accentColorValue}
-                onChange={(e) => updateSettings({ accentColor: e.target.value })}
+                onChange={(e) => updateDraft({ accentColor: e.target.value })}
                 aria-label="Choose custom accent color"
               />
             </div>
@@ -144,8 +278,8 @@ export default function Settings() {
                 <button
                   key={density}
                   type="button"
-                  className={`segmented-btn ${settings.density === density ? 'active' : ''}`}
-                  onClick={() => updateSettings({ density })}
+                  className={`segmented-btn ${draftSettings.density === density ? 'active' : ''}`}
+                  onClick={() => updateDraft({ density })}
                 >
                   {density.charAt(0).toUpperCase() + density.slice(1)}
                 </button>
@@ -165,8 +299,8 @@ export default function Settings() {
             </div>
             <select
               className="select-field"
-              value={settings.sidebarBehavior}
-              onChange={(e) => updateSettings({ sidebarBehavior: e.target.value as SiteSettings['sidebarBehavior'] })}
+              value={draftSettings.sidebarBehavior}
+              onChange={(e) => updateDraft({ sidebarBehavior: e.target.value as SiteSettings['sidebarBehavior'] })}
             >
               <option value="expanded">Expanded</option>
               <option value="collapsed">Collapsed</option>
@@ -181,8 +315,8 @@ export default function Settings() {
             <input
               type="text"
               className="practice-name-input"
-              value={settings.practiceName}
-              onChange={(e) => updateSettings({ practiceName: e.target.value })}
+              value={draftSettings.practiceName}
+              onChange={(e) => updateDraft({ practiceName: e.target.value })}
               placeholder="Enter your practice name"
               maxLength={30}
             />
@@ -195,8 +329,8 @@ export default function Settings() {
             </div>
             <select
               className="select-field"
-              value={settings.language}
-              onChange={(e) => updateSettings({ language: e.target.value as SiteSettings['language'] })}
+              value={draftSettings.language}
+              onChange={(e) => updateDraft({ language: e.target.value as SiteSettings['language'] })}
             >
               {languageOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -216,8 +350,8 @@ export default function Settings() {
                 <button
                   key={format}
                   type="button"
-                  className={`segmented-btn ${settings.timeFormat === format ? 'active' : ''}`}
-                  onClick={() => updateSettings({ timeFormat: format })}
+                  className={`segmented-btn ${draftSettings.timeFormat === format ? 'active' : ''}`}
+                  onClick={() => updateDraft({ timeFormat: format })}
                 >
                   {format}
                 </button>
@@ -248,7 +382,7 @@ export default function Settings() {
               </div>
               <div className="preview-row">
                 <span>Sidebar</span>
-                <strong>{settings.sidebarBehavior === 'collapsed' ? 'Collapsed' : 'Expanded'}</strong>
+                <strong>{draftSettings.sidebarBehavior === 'collapsed' ? 'Collapsed' : 'Expanded'}</strong>
               </div>
             </div>
             <button className="btn btn-primary" type="button">

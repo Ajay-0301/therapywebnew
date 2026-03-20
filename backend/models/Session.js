@@ -7,10 +7,19 @@ const SessionSchema = new mongoose.Schema({
     required: true,
     index: true,
   },
+  username: {
+    type: String,
+    required: true,
+    index: true,
+  },
   clientId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Client',
     required: true,
+  },
+  externalRecordId: {
+    type: String,
+    index: true,
   },
   clientName: String,
   sessionDate: {

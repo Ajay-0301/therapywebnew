@@ -9,7 +9,7 @@ import * as api from '../utils/api';
 import '../styles/calendar.css';
 
 interface Appointment {
-  id: string;
+  _id: string;
   clientName: string;
   clientAge?: number;
   dateTime: number;
@@ -51,6 +51,7 @@ const DEFAULT_FOLLOWUP_HOUR = 10;
 
 // Unified calendar event type
 interface CalendarEvent {
+  _id?: string;
   id: string;
   clientName: string;
   clientId?: string; // to navigate to profile
@@ -100,7 +101,15 @@ export default function Calendar() {
         ]);
         console.log('Calendar: Loaded appointments:', appointmentsData);
         console.log('Calendar: Loaded clients with sessions:', clientsData);
-        setAppointments(Array.isArray(appointmentsData) ? appointmentsData : []);
+        
+        // Normalize appointments - ensure dateTime is a number (timestamp)
+        const normalizedAppointments = Array.isArray(appointmentsData)
+          ? appointmentsData.map((a: any) => ({
+              ...a,
+              dateTime: typeof a.dateTime === 'string' ? new Date(a.dateTime).getTime() : a.dateTime,
+            }))
+          : [];
+        setAppointments(normalizedAppointments);
         setClients(Array.isArray(clientsData) ? clientsData : []);
       } catch (err) {
         console.error('Failed to load calendar data:', err);
@@ -155,7 +164,7 @@ export default function Calendar() {
           events.push({
             id: `fu-${s.id}`,
             clientName: client.name,
-            clientId: (client as any)._id || client.id,
+            clientId: client._id,
             clientAge: client.age,
             dateTime: fuDate.getTime(),
             duration: 60,
@@ -171,6 +180,7 @@ export default function Calendar() {
   // Merge appointments + follow-ups into unified events
   const allEvents = useMemo<CalendarEvent[]>(() => {
     const apptEvents: CalendarEvent[] = appointments.map((a) => ({
+      _id: a._id,
       id: a.id,
       clientName: a.clientName,
       clientAge: a.clientAge,
@@ -294,16 +304,36 @@ export default function Calendar() {
       ...(formClientId && { clientId: formClientId }),
     };
 
+    // Add to local state for instant display
     const updated = [...appointments, newAppt];
-    api.createAppointment(appointmentWithClientId).catch(err => console.error('Failed to save appointment:', err));
     setAppointments(updated);
+
+    // Save to backend and fetch fresh data after creation
+    api.createAppointment(appointmentWithClientId)
+      .then(() => {
+        console.log('Calendar: Appointment created, reloading fresh data...');
+        // Fetch fresh appointments to get MongoDB _id and clean data
+        return api.getAppointments();
+      })
+      .then((freshData: any) => {
+        const normalizedAppointments = Array.isArray(freshData)
+          ? freshData.map((a: any) => ({
+              ...a,
+              dateTime: typeof a.dateTime === 'string' ? new Date(a.dateTime).getTime() : a.dateTime,
+            }))
+          : [];
+        setAppointments(normalizedAppointments);
+        console.log('Calendar: Fresh appointments loaded:', normalizedAppointments);
+      })
+      .catch(err => console.error('Failed to save or reload appointment:', err));
+
     // Broadcast change to Dashboard and other components
     window.dispatchEvent(new CustomEvent('clientDataUpdated'));
     setShowModal(false);
   }
 
   function deleteAppointment(id: string) {
-    const updated = appointments.filter((a) => a.id !== id);
+    const updated = appointments.filter((a) => a.id !== id && a._id !== id);
     api.deleteAppointment(id).catch(err => console.error('Failed to delete appointment:', err));
     setAppointments(updated);
     // Broadcast change to Dashboard
@@ -475,7 +505,7 @@ export default function Calendar() {
                             {evt.type === 'followup' && <span className="cal-sidebar-item-tag followup-tag">Follow-up</span>}
                           </div>
                           {evt.type === 'appointment' && (
-                            <button className="cal-sidebar-item-delete" title="Remove" onClick={(e) => { e.stopPropagation(); deleteAppointment(evt.id); }}>
+                            <button className="cal-sidebar-item-delete" title="Remove" onClick={(e) => { e.stopPropagation(); deleteAppointment(evt._id || evt.id); }}>
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
                               </svg>
@@ -606,7 +636,7 @@ export default function Calendar() {
                 >
                   <option value="">-- Select a client (optional) --</option>
                   {clients.map((client: Client) => (
-                    <option key={(client as any)._id || client.id} value={(client as any)._id || client.id}>
+                    <option key={client._id} value={client._id}>
                       {client.name} {client.age ? `(${client.age})` : ''}
                     </option>
                   ))}

@@ -34,6 +34,7 @@ exports.createSession = async (req, res) => {
 
     const session = new Session({
       userId: req.user.id,
+      username: req.user.username,
       clientId,
       clientName,
       sessionDate,
@@ -62,6 +63,7 @@ exports.updateSession = async (req, res) => {
     const session = await Session.findOneAndUpdate(
       { _id: req.params.id, userId: req.user.id },
       {
+        username: req.user.username,
         clientId,
         clientName,
         sessionDate,

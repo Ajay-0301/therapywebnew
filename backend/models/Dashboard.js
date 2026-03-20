@@ -8,6 +8,11 @@ const DashboardSchema = new mongoose.Schema({
     unique: true,
     index: true,
   },
+  username: {
+    type: String,
+    required: true,
+    index: true,
+  },
   totalClients: {
     type: Number,
     default: 0,

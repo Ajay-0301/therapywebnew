@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Dispatch, SetStateAction } from 'react';
 import { getUserData, saveUserData, getSiteSettings, type UserData } from '../utils/store';
+import * as api from '../utils/api';
 import '../styles/layout.css';
 
 const navItems = [
@@ -45,6 +46,32 @@ export default function Sidebar({ collapsed, setCollapsed }: { collapsed: boolea
     }
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
+  useEffect(() => {
+    const hasToken = !!localStorage.getItem('authToken');
+    if (!hasToken) return;
+
+    const syncCurrentUser = async () => {
+      try {
+        const me = await api.getCurrentUser();
+        const merged: UserData = {
+          ...(getUserData() || { email: '', name: '' }),
+          id: (me._id || me.id || userData?.id || '').toString(),
+          email: me.email || userData?.email || '',
+          name: me.fullName || me.name || userData?.name || '',
+          avatar: me.avatar || '',
+          registeredAt: userData?.registeredAt || new Date().toISOString(),
+        };
+        saveUserData(merged);
+        setUserData(merged);
+      } catch (err) {
+        console.error('Failed to sync current user', err);
+      }
+    };
+
+    syncCurrentUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -101,6 +128,7 @@ export default function Sidebar({ collapsed, setCollapsed }: { collapsed: boolea
     try {
       const resized = await resizeImageToDataUrl(f, 512, 0.8);
       const newData: UserData = { ...(userData || { name: '', email: '' }), avatar: resized, name: (userData?.name || draftName || '').trim(), email: userData?.email || '' };
+      await api.updateCurrentUser({ avatar: resized, name: newData.name });
       saveUserData(newData);
       setUserData(newData);
     } catch (err) {
@@ -112,14 +140,19 @@ export default function Sidebar({ collapsed, setCollapsed }: { collapsed: boolea
 
   function removeAvatar() {
     if (!userData) return;
-    const newData = { ...userData } as any;
-    delete newData.avatar;
+    const newData = { ...userData, avatar: '' };
+    api.updateCurrentUser({ avatar: '', name: newData.name }).catch((err) => {
+      console.error('Failed to remove avatar from backend', err);
+    });
     saveUserData(newData);
     setUserData(newData);
   }
 
   function handleSaveName() {
     const newData: UserData = { ...(userData || { name: '', email: '' }), name: draftName.trim(), email: userData?.email || '' };
+    api.updateCurrentUser({ name: newData.name, avatar: newData.avatar || '' }).catch((err) => {
+      console.error('Failed to save name to backend', err);
+    });
     saveUserData(newData);
     setUserData(newData);
     setEditing(false);

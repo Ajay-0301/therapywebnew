@@ -437,8 +437,8 @@ body.dark-mode .border-dark {
     }
 }
 
-/* Mobile (portrait): 480px - 767px */
-@media (max-width: 768px) {
+/* Mobile (portrait): up to 640px */
+@media (max-width: 640px) {
     .page-header {
         padding: 20px 20px;
         margin-bottom: 20px;

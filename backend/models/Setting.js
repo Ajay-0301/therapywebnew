@@ -5,19 +5,46 @@ const SettingSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
   },
+  username: {
+    type: String,
+    index: true,
+  },
+  themeMode: {
+    type: String,
+    enum: ['light', 'dark', 'system'],
+    default: 'system',
+  },
   theme: {
     type: String,
-    enum: ['light', 'dark'],
-    default: 'light',
+    enum: ['light', 'dark', 'system'],
+    default: 'system',
   },
   density: {
     type: String,
     enum: ['comfortable', 'compact'],
     default: 'comfortable',
   },
+  sidebarBehavior: {
+    type: String,
+    enum: ['expanded', 'collapsed'],
+    default: 'expanded',
+  },
   language: {
     type: String,
     default: 'en',
+  },
+  timeFormat: {
+    type: String,
+    enum: ['12h', '24h'],
+    default: '12h',
+  },
+  accentColor: {
+    type: String,
+    default: '#667eea',
+  },
+  practiceName: {
+    type: String,
+    default: 'Therapy',
   },
   notifications: {
     type: Boolean,

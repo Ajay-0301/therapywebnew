@@ -7,6 +7,11 @@ const EarningSchema = new mongoose.Schema({
     required: true,
     index: true,
   },
+  username: {
+    type: String,
+    required: true,
+    index: true,
+  },
   day: Number,
   month: Number,
   year: Number,

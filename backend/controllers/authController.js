@@ -32,7 +32,7 @@ exports.register = async (req, res) => {
     res.status(201).json({
       message: 'User registered successfully',
       token,
-      user: { id: user._id, username: user.username, email: user.email, name: user.fullName },
+      user: { id: user._id, username: user.username, email: user.email, name: user.fullName, avatar: user.avatar || '' },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -77,7 +77,7 @@ exports.login = async (req, res) => {
     res.json({
       message: 'Login successful',
       token,
-      user: { id: user._id, username: user.username, email: user.email, name: user.fullName },
+      user: { id: user._id, username: user.username, email: user.email, name: user.fullName, avatar: user.avatar || '' },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -92,6 +92,43 @@ exports.getCurrentUser = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
     res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.updateCurrentUser = async (req, res) => {
+  try {
+    const { name, avatar } = req.body;
+    const updateData = {};
+
+    if (typeof name === 'string') {
+      updateData.fullName = name.trim();
+    }
+
+    if (avatar !== undefined) {
+      updateData.avatar = avatar;
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.fullName,
+        avatar: user.avatar || '',
+      },
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

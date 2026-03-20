@@ -4,6 +4,7 @@ import '../styles/insights.css';
 
 interface Client {
   id: string;
+  _id?: string;
   clientId: string;
   name: string;
   email: string;
@@ -11,10 +12,20 @@ interface Client {
   age?: number;
   status: 'active' | 'completed' | 'on-hold';
   createdAt?: string | number;
+  sessionHistory?: SessionRecord[];
+}
+
+interface SessionRecord {
+  id: string;
+  date: string;
+  notes: string;
+  followUpDate: string;
+  followUpNotes: string;
 }
 
 interface DeletedClient {
   id: string;
+  _id?: string;
   clientId: string;
   name: string;
   email: string;
@@ -23,17 +34,20 @@ interface DeletedClient {
 
 interface Appointment {
   id: string;
+  _id?: string;
   clientName: string;
   dateTime: number;
   status?: 'scheduled' | 'completed' | 'cancelled';
 }
 
 interface Earning {
-  id: string;
+  id?: string;
+  _id?: string;
   day: number;
   month: number;
   year: number;
   amount: number;
+  timestamp?: number | string | Date;
 }
 
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -73,11 +87,33 @@ export default function Insights() {
         setDeletedClients([]);
         setAppointments(Array.isArray(appointmentsData) ? appointmentsData : []);
         setEarnings(Array.isArray(earningsData) ? earningsData : []);
+        console.log('Insights: Loaded earnings:', earningsData);
       } catch (err) {
         console.error('Failed to load insights data:', err);
       }
     };
     loadData();
+
+    // Listen for data updates
+    const handleDataUpdated = () => {
+      console.log('Insights: Data updated from other components, reloading...');
+      loadData();
+    };
+
+    // Reload data when tab becomes visible
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('Insights: Tab became visible, reloading data...');
+        loadData();
+      }
+    };
+
+    window.addEventListener('clientDataUpdated', handleDataUpdated);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      window.removeEventListener('clientDataUpdated', handleDataUpdated);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   // Calculate metrics for selected month
@@ -137,33 +173,44 @@ export default function Insights() {
     // Calculate the difference
     const difference = newTotal - totalMonthEarnings;
     
+    let updated;
+    
     // If there are existing earnings, distribute proportionally. Otherwise create a day 1 entry
     if (monthEarnings.length > 0) {
       // Get the first earning and adjust it by the difference
-      const updated = earnings.map(e => {
+      updated = earnings.map(e => {
         if (e.day === monthEarnings[0].day && e.month === selectedMonth && e.year === selectedYear) {
-          return { ...e, amount: e.amount + difference, timestamp: Date.now() };
+          return { ...e, amount: e.amount + difference };
         }
         return e;
       });
-      setEarnings(updated);
-      api.saveEarnings(updated).catch(err => console.error('Failed to save earnings:', err));
     } else {
       // Create a new entry for day 1
       const newEarning: Earning = {
-        id: Date.now().toString(),
         day: 1,
         month: selectedMonth,
         year: selectedYear,
         amount: newTotal,
       };
-      const updated = [...earnings, newEarning];
-      setEarnings(updated);
-      api.saveEarnings(updated).catch(err => console.error('Failed to save earnings:', err));
+      updated = [...earnings, newEarning];
     }
     
+    // Update local state first
+    setEarnings(updated);
     setEditingTotalEarnings(false);
     setNewTotalEarnings('');
+    
+    // Save to backend and reload fresh data
+    api.saveEarnings(updated)
+      .then(() => {
+        console.log('Insights: Total earnings saved, reloading fresh data...');
+        return api.getEarnings();
+      })
+      .then((freshData) => {
+        setEarnings(Array.isArray(freshData) ? freshData : []);
+        console.log('Insights: Fresh earnings loaded:', freshData);
+      })
+      .catch(err => console.error('Failed to save total earnings:', err));
   };
 
   // Get age distribution
@@ -225,25 +272,34 @@ export default function Insights() {
       updated[existingIndex] = {
         ...updated[existingIndex],
         amount,
-        timestamp: Date.now()
       };
     } else {
       // Add new
       const newEarning: Earning = {
-        id: Date.now().toString(),
         day,
         month: selectedMonth,
         year: selectedYear,
         amount,
-        timestamp: Date.now()
       };
       updated = [...earnings, newEarning];
     }
     
+    // Update local state first for instant UI feedback
     setEarnings(updated);
-    api.saveEarnings(updated).catch(err => console.error('Failed to save earnings:', err));
     setEarnDay('');
     setEarnAmount('');
+    
+    // Save to backend and reload fresh data
+    api.saveEarnings(updated)
+      .then(() => {
+        console.log('Insights: Earning saved, reloading fresh data...');
+        return api.getEarnings();
+      })
+      .then((freshData) => {
+        setEarnings(Array.isArray(freshData) ? freshData : []);
+        console.log('Insights: Fresh earnings loaded:', freshData);
+      })
+      .catch(err => console.error('Failed to save earning:', err));
   };
 
   const handleEditDay = (day: number) => {
@@ -292,7 +348,7 @@ export default function Insights() {
   const maxEarning = Math.max(...earningsByDay, 1);
 
   return (
-    <section className="page active">
+    <section className="page active insights-page">
       <div className="page-header">
         <div className="page-header-icon">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

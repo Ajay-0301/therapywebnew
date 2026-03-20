@@ -121,6 +121,20 @@ export default function ClientProfile() {
     
     loadClient();
     
+    // Listen for changes from other components
+    const handleClientDataUpdated = () => {
+      console.log('ClientProfile: Data updated from other components, reloading...');
+      loadClient();
+    };
+    
+    // Reload when page becomes visible (tab switching)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('ClientProfile: Tab became visible, refreshing data...');
+        loadClient();
+      }
+    };
+    
     const settings = getSiteSettings();
     setTimeFormat(settings.timeFormat);
     
@@ -129,9 +143,13 @@ export default function ClientProfile() {
       setTimeFormat(updated.timeFormat);
     };
     
+    window.addEventListener('clientDataUpdated', handleClientDataUpdated);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('site-settings-updated', handleSettingsChange);
     
     return () => {
+      window.removeEventListener('clientDataUpdated', handleClientDataUpdated);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('site-settings-updated', handleSettingsChange);
     };
   }, [id, navigate]);

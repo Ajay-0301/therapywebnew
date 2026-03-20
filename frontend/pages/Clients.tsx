@@ -59,6 +59,28 @@ export default function Clients() {
       }
     };
     loadClients();
+    
+    // Listen for changes from other components
+    const handleClientDataUpdated = () => {
+      console.log('Clients: Data updated from other components, reloading...');
+      loadClients();
+    };
+    
+    // Reload when page becomes visible (tab switching)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('Clients: Tab became visible, refreshing data...');
+        loadClients();
+      }
+    };
+    
+    window.addEventListener('clientDataUpdated', handleClientDataUpdated);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      window.removeEventListener('clientDataUpdated', handleClientDataUpdated);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   const filtered = clients.filter((c) => {

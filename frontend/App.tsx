@@ -37,14 +37,6 @@ function App() {
     };
   }, []);
 
-  useEffect(() => {
-    if (siteSettings.themeMode !== 'system') return;
-    const media = window.matchMedia('(prefers-color-scheme: dark)');
-    const onChange = () => applySiteSettings(getSiteSettings());
-    media.addEventListener('change', onChange);
-    return () => media.removeEventListener('change', onChange);
-  }, [siteSettings.themeMode]);
-
   return (
     <Routes>
       <Route path="/" element={<Login />} />

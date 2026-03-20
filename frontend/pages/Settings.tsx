@@ -18,6 +18,12 @@ const languageOptions: Array<{ value: SiteSettings['language']; label: string; l
   { value: 'fr', label: 'French', locale: 'fr-FR' }
 ];
 
+function normalizeThemeMode(value: unknown): SiteSettings['themeMode'] {
+  if (value === 'dark') return 'dark';
+  if (value === 'light') return 'light';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
 export default function Settings() {
   const [settings, setSettings] = useState<SiteSettings>(() => getSiteSettings());
   const [draftSettings, setDraftSettings] = useState<SiteSettings>(() => getSiteSettings());
@@ -54,7 +60,7 @@ export default function Settings() {
       try {
         const serverSettings: any = await api.getSettings();
         const normalized: SiteSettings = {
-          themeMode: serverSettings.themeMode || serverSettings.theme || settings.themeMode || 'system',
+          themeMode: normalizeThemeMode(serverSettings.themeMode || serverSettings.theme || settings.themeMode),
           density: serverSettings.density || 'comfortable',
           sidebarBehavior: serverSettings.sidebarBehavior || 'expanded',
           language: serverSettings.language || 'en',
@@ -221,10 +227,10 @@ export default function Settings() {
           <div className="setting-row">
             <div>
               <p className="setting-title">Theme</p>
-              <p className="setting-desc">Use light, dark, or match your system theme</p>
+              <p className="setting-desc">Choose between light and dark mode</p>
             </div>
             <div className="segmented">
-              {(['light', 'dark', 'system'] as const).map((mode) => (
+              {(['light', 'dark'] as const).map((mode) => (
                 <button
                   key={mode}
                   type="button"

@@ -85,7 +85,7 @@ export interface UserData {
 }
 
 export interface SiteSettings {
-    themeMode: 'light' | 'dark' | 'system';
+    themeMode: 'light' | 'dark';
     density: 'compact' | 'comfortable';
     sidebarBehavior: 'expanded' | 'collapsed';
     language: 'en' | 'hi' | 'ta' | 'es' | 'fr';
@@ -95,7 +95,7 @@ export interface SiteSettings {
 }
 
 export const defaultSiteSettings: SiteSettings = {
-    themeMode: 'system',
+    themeMode: 'light',
     density: 'comfortable',
     sidebarBehavior: 'expanded',
     language: 'en',

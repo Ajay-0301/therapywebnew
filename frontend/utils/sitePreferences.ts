@@ -41,9 +41,6 @@ function mixColor(hex: string, target: { r: number; g: number; b: number }, amou
 }
 
 export function resolveThemeMode(settings: SiteSettings): 'light' | 'dark' {
-  if (settings.themeMode === 'system') {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }
   return settings.themeMode;
 }
 

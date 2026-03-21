@@ -726,4 +726,9 @@ body.dark-mode .main-content {
         top: 20px;
         font-size: 18px;
     }
+
+    /* Keep the floating menu button out of the brand area when sidebar is open */
+    .mobile-menu-toggle.is-collapsed {
+        left: 252px;
+    }
 }

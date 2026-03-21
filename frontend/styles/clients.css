@@ -1177,3 +1177,87 @@ body.dark-mode .empty-state-subtext {
         font-size: 12px;
     }
 }
+
+/* Extra Small Phones (360px and below) */
+@media (max-width: 360px) {
+    .modal-content {
+        width: 95%;
+        max-width: calc(100% - 20px);
+        border-radius: 14px;
+    }
+
+    .modal-header {
+        padding: 16px;
+        gap: 8px;
+    }
+
+    .modal-header h2 {
+        font-size: 18px;
+    }
+
+    .modal-close {
+        width: 28px;
+        height: 28px;
+    }
+
+    .modal-form {
+        padding: 16px;
+    }
+
+    .modal-form .form-group {
+        margin-bottom: 14px;
+    }
+
+    .modal-form .form-group label {
+        font-size: 12px;
+        margin-bottom: 6px;
+    }
+
+    .modal-form .form-group input,
+    .modal-form .form-group select {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+
+    .contact-toggle {
+        gap: 0;
+    }
+
+    .toggle-btn {
+        padding: 8px 4px;
+        font-size: 12px;
+    }
+
+    .age-spinner {
+        width: 100%;
+    }
+
+    .spinner-btn {
+        flex: 1;
+        width: 100%;
+        height: 36px;
+    }
+
+    .age-input {
+        width: 100% !important;
+        height: 36px !important;
+        padding: 6px 4px !important;
+    }
+
+    .modal-actions {
+        margin-top: 16px;
+        gap: 8px;
+    }
+
+    .id-field .id-check {
+        width: 18px;
+        height: 18px;
+        font-size: 11px;
+    }
+
+    .id-suggestion {
+        margin-top: 6px;
+        flex-wrap: wrap;
+        font-size: 12px;
+    }
+}

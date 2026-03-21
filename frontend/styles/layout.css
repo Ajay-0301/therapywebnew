@@ -727,8 +727,11 @@ body.dark-mode .main-content {
         font-size: 18px;
     }
 
-    /* Keep the floating menu button out of the brand area when sidebar is open */
+    /* On mobile, hide floating hamburger while sidebar is open.
+       User can close via the sidebar header arrow button. */
     .mobile-menu-toggle.is-collapsed {
-        left: 252px;
+        opacity: 0;
+        pointer-events: none;
+        transform: scale(0.9);
     }
 }

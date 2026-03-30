@@ -151,7 +151,7 @@ A full-stack web application for mental health professionals to manage clients, 
 	- Payment trends
 - **Custom Date Range**:
 	- Filter insights by date
-	- Dynamic chart updates
+	- Dynamic chart updates,
 
 ### ⚙️ Settings Page
 - **Theme Customization**:

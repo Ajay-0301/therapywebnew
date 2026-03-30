@@ -1,6 +1,6 @@
-import { useState, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { saveUserData } from '../utils/store';
+import { useState, FormEvent, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { saveUserData, getUserData } from '../utils/store';
 import * as api from '../utils/api';
 import '../styles/login.css';
 
@@ -22,7 +22,18 @@ const MIN_PASSWORD_LENGTH = 8;
 
 export default function Login() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const returnTo = searchParams.get('returnTo') || '/dashboard';
+    
     const [isLogin, setIsLogin] = useState(true);
+
+    // If user is already logged in, redirect them to dashboard
+    useEffect(() => {
+        const user = getUserData();
+        if (user) {
+            navigate(returnTo);
+        }
+    }, [navigate, returnTo]);
 
     // Login state
     const [loginEmail, setLoginEmail] = useState('');
@@ -73,7 +84,8 @@ export default function Login() {
                     registeredAt: new Date().toISOString() 
                 };
                 saveUserData(userData);
-                navigate('/dashboard');
+                // Redirect to the originally requested page or dashboard
+                navigate(returnTo);
             } else {
                 setError('Login response invalid. Please try again.');
             }
@@ -110,7 +122,8 @@ export default function Login() {
                     registeredAt: new Date().toISOString() 
                 };
                 saveUserData(userData);
-                navigate('/dashboard');
+                // Redirect to the originally requested page or dashboard
+                navigate(returnTo);
             } else {
                 setError('Registration response invalid. Please try again.');
             }

@@ -19,7 +19,9 @@ exports.createPatientLog = async (req, res) => {
       ipOp: payload.ipOp || '',
       ipWard: payload.ipWard || '',
       name: payload.name || '',
-      ageGender: payload.ageGender || '',
+      age: payload.age || '',
+      gender: payload.gender || '',
+      ageGender: payload.ageGender || `${payload.age || ''}${payload.age && payload.gender ? ' / ' : ''}${payload.gender || ''}`.trim(),
       opNumber: payload.opNumber || '',
       diagnosis: payload.diagnosis || '',
       treatmentDone: payload.treatmentDone || '',
@@ -45,6 +47,8 @@ exports.updatePatientLog = async (req, res) => {
       'ipOp',
       'ipWard',
       'name',
+      'age',
+      'gender',
       'ageGender',
       'opNumber',
       'diagnosis',
@@ -57,6 +61,10 @@ exports.updatePatientLog = async (req, res) => {
       if (req.body[field] !== undefined) {
         updates[field] = req.body[field];
       }
+    }
+
+    if (updates.age !== undefined || updates.gender !== undefined) {
+      updates.ageGender = `${updates.age || existing.age || ''}${(updates.age || existing.age) && (updates.gender || existing.gender) ? ' / ' : ''}${updates.gender || existing.gender || ''}`.trim();
     }
 
     updates.updatedAt = new Date();

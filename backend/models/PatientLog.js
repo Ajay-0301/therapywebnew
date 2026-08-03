@@ -28,6 +28,14 @@ const PatientLogSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  age: {
+    type: String,
+    default: '',
+  },
+  gender: {
+    type: String,
+    default: '',
+  },
   ageGender: {
     type: String,
     default: '',

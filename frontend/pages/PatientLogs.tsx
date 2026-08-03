@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import * as api from '../utils/api';
-import { type PatientLogRecord } from '../utils/store';
 import '../styles/client-profile.css';
 
 const initialFormState = {
@@ -8,15 +7,28 @@ const initialFormState = {
   ipOp: '',
   ipWard: '',
   name: '',
-  ageGender: '',
+  age: '',
+  gender: '',
   opNumber: '',
   diagnosis: '',
   treatmentDone: '',
   cost: '',
 };
 
-interface PatientLogRow extends PatientLogRecord {
+interface PatientLogRow {
   _id?: string;
+  id?: string;
+  dateOfVisit: string;
+  ipOp: string;
+  ipWard: string;
+  name: string;
+  age?: string;
+  gender?: string;
+  ageGender?: string;
+  opNumber: string;
+  diagnosis: string;
+  treatmentDone: string;
+  cost: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -28,12 +40,14 @@ export default function PatientLogs() {
   const [loading, setLoading] = useState(true);
 
   const ipOpOptions = useMemo(() => {
-    return [...new Set(logs.map((log) => log.ipOp).filter(Boolean))];
+    return ['IP', 'OP', ...new Set(logs.map((log) => log.ipOp).filter(Boolean))];
   }, [logs]);
 
   const wardOptions = useMemo(() => {
-    return [...new Set(logs.map((log) => log.ipWard).filter(Boolean))];
+    return ['Ward', 'Room', ...new Set(logs.map((log) => log.ipWard).filter(Boolean))];
   }, [logs]);
+
+  const genderOptions = ['Male', 'Female', 'Unspecified'];
 
   async function loadLogs() {
     try {
@@ -66,13 +80,14 @@ export default function PatientLogs() {
   }
 
   function startEdit(log: PatientLogRow) {
-    setEditingId(log._id || log.id);
+    setEditingId(log._id || log.id || null);
     setForm({
       dateOfVisit: log.dateOfVisit || '',
       ipOp: log.ipOp || '',
       ipWard: log.ipWard || '',
       name: log.name || '',
-      ageGender: log.ageGender || '',
+      age: log.age || log.ageGender?.split('/')[0]?.trim() || '',
+      gender: log.gender || log.ageGender?.split('/')[1]?.trim() || '',
       opNumber: log.opNumber || '',
       diagnosis: log.diagnosis || '',
       treatmentDone: log.treatmentDone || '',
@@ -86,7 +101,9 @@ export default function PatientLogs() {
       ipOp: form.ipOp,
       ipWard: form.ipWard,
       name: form.name,
-      ageGender: form.ageGender,
+      age: form.age,
+      gender: form.gender,
+      ageGender: `${form.age || ''}${form.age && form.gender ? ' / ' : ''}${form.gender || ''}`.trim(),
       opNumber: form.opNumber,
       diagnosis: form.diagnosis,
       treatmentDone: form.treatmentDone,
@@ -171,8 +188,22 @@ export default function PatientLogs() {
             <input type="text" className="field-input" value={form.name} onChange={(e) => updateField('name', e.target.value)} placeholder="Patient name" />
           </label>
           <label className="field-box patient-log-field">
-            <span className="field-label">Age and gender</span>
-            <input type="text" className="field-input" value={form.ageGender} onChange={(e) => updateField('ageGender', e.target.value)} placeholder="Age / Gender" />
+            <span className="field-label">Age</span>
+            <input type="text" className="field-input" value={form.age} onChange={(e) => updateField('age', e.target.value)} placeholder="Age" />
+          </label>
+          <label className="field-box patient-log-field">
+            <span className="field-label">Gender</span>
+            <input
+              type="text"
+              className="field-input"
+              list="gender-suggestions"
+              value={form.gender}
+              onChange={(e) => updateField('gender', e.target.value)}
+              placeholder="Gender"
+            />
+            <datalist id="gender-suggestions">
+              {genderOptions.map((option) => <option key={option} value={option} />)}
+            </datalist>
           </label>
           <label className="field-box patient-log-field">
             <span className="field-label">OP Number</span>
@@ -230,7 +261,8 @@ export default function PatientLogs() {
                   <div className="patient-log-meta"><strong>IP/OP</strong><span>{log.ipOp || '—'}</span></div>
                   <div className="patient-log-meta"><strong>IP Ward</strong><span>{log.ipWard || '—'}</span></div>
                   <div className="patient-log-meta"><strong>Name</strong><span>{log.name || '—'}</span></div>
-                  <div className="patient-log-meta"><strong>Age/Gender</strong><span>{log.ageGender || '—'}</span></div>
+                  <div className="patient-log-meta"><strong>Age</strong><span>{log.age || log.ageGender?.split('/')[0]?.trim() || '—'}</span></div>
+                  <div className="patient-log-meta"><strong>Gender</strong><span>{log.gender || log.ageGender?.split('/')[1]?.trim() || '—'}</span></div>
                   <div className="patient-log-meta"><strong>OP Number</strong><span>{log.opNumber || '—'}</span></div>
                   <div className="patient-log-meta"><strong>Diagnosis</strong><span>{log.diagnosis || '—'}</span></div>
                   <div className="patient-log-meta"><strong>Treatment</strong><span>{log.treatmentDone || '—'}</span></div>

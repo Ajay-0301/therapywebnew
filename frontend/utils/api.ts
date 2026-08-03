@@ -171,7 +171,9 @@ export interface PatientLogApiRecord {
   ipOp: string;
   ipWard: string;
   name: string;
-  ageGender: string;
+  age?: string;
+  gender?: string;
+  ageGender?: string;
   opNumber: string;
   diagnosis: string;
   treatmentDone: string;

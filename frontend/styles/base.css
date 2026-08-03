@@ -120,6 +120,19 @@ body:not(.dark-mode) .quick-select-item {
     background: rgba(226, 232, 240, 0.8) !important;
 }
 
+body:not(.dark-mode) .quick-suggestion-chip {
+    color: #1e40af !important;
+    font-weight: 700 !important;
+    background: #eff6ff !important;
+    border-color: #93c5fd !important;
+}
+
+body:not(.dark-mode) .quick-suggestion-chip:hover {
+    background: #dbeafe !important;
+    color: #1e3a8a !important;
+    border-color: #3b82f6 !important;
+}
+
 body:not(.dark-mode) .section-title {
     color: #0f172a !important;
     font-weight: 800 !important;

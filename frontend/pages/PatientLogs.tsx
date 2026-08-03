@@ -132,7 +132,7 @@ export default function PatientLogs() {
         </div>
       </div>
 
-      <div className="profile-card">
+      <div className="profile-card patient-log-form-card">
         <div className="patient-log-grid">
           <label className="field-box patient-log-field">
             <span className="field-label">Date of visit</span>
@@ -142,7 +142,7 @@ export default function PatientLogs() {
             <span className="field-label">IP/OP</span>
             <input
               type="text"
-              className="field-input"
+              className="field-input input-with-suggestions"
               list="ipop-suggestions"
               value={form.ipOp}
               onChange={(e) => updateField('ipOp', e.target.value)}
@@ -156,7 +156,7 @@ export default function PatientLogs() {
             <span className="field-label">IP Ward</span>
             <input
               type="text"
-              className="field-input"
+              className="field-input input-with-suggestions"
               list="ward-suggestions"
               value={form.ipWard}
               onChange={(e) => updateField('ipWard', e.target.value)}
@@ -227,14 +227,14 @@ export default function PatientLogs() {
                   </div>
                 </div>
                 <div className="patient-log-details">
-                  <div><strong>IP/OP:</strong> {log.ipOp || '—'}</div>
-                  <div><strong>IP Ward:</strong> {log.ipWard || '—'}</div>
-                  <div><strong>Name:</strong> {log.name || '—'}</div>
-                  <div><strong>Age/Gender:</strong> {log.ageGender || '—'}</div>
-                  <div><strong>OP Number:</strong> {log.opNumber || '—'}</div>
-                  <div><strong>Diagnosis:</strong> {log.diagnosis || '—'}</div>
-                  <div><strong>Treatment:</strong> {log.treatmentDone || '—'}</div>
-                  <div><strong>Cost:</strong> {log.cost || '—'}</div>
+                  <div className="patient-log-meta"><strong>IP/OP</strong><span>{log.ipOp || '—'}</span></div>
+                  <div className="patient-log-meta"><strong>IP Ward</strong><span>{log.ipWard || '—'}</span></div>
+                  <div className="patient-log-meta"><strong>Name</strong><span>{log.name || '—'}</span></div>
+                  <div className="patient-log-meta"><strong>Age/Gender</strong><span>{log.ageGender || '—'}</span></div>
+                  <div className="patient-log-meta"><strong>OP Number</strong><span>{log.opNumber || '—'}</span></div>
+                  <div className="patient-log-meta"><strong>Diagnosis</strong><span>{log.diagnosis || '—'}</span></div>
+                  <div className="patient-log-meta"><strong>Treatment</strong><span>{log.treatmentDone || '—'}</span></div>
+                  <div className="patient-log-meta"><strong>Cost</strong><span>{log.cost || '—'}</span></div>
                 </div>
               </div>
             ))}

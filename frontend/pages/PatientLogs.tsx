@@ -48,6 +48,13 @@ export default function PatientLogs() {
   }, [logs]);
 
   const genderOptions = ['Male', 'Female', 'Unspecified'];
+  const treatmentOptions = [
+    'Therapy',
+    'Assessment',
+    'Relaxation Exercise',
+    'Counseling',
+    'Follow-up',
+  ];
 
   async function loadLogs() {
     try {
@@ -77,6 +84,12 @@ export default function PatientLogs() {
   function resetForm() {
     setForm(initialFormState);
     setEditingId(null);
+  }
+
+  function adjustAge(delta: number) {
+    const currentValue = Number.parseInt(form.age || '0', 10);
+    const nextValue = Number.isNaN(currentValue) ? delta : currentValue + delta;
+    updateField('age', String(Math.max(0, nextValue)));
   }
 
   function startEdit(log: PatientLogRow) {
@@ -189,7 +202,11 @@ export default function PatientLogs() {
           </label>
           <label className="field-box patient-log-field">
             <span className="field-label">Age</span>
-            <input type="text" className="field-input" value={form.age} onChange={(e) => updateField('age', e.target.value)} placeholder="Age" />
+            <div className="age-stepper-box">
+              <button type="button" className="age-stepper-btn" onClick={() => adjustAge(-1)} title="Decrease age">−</button>
+              <input type="number" className="field-input" value={form.age} onChange={(e) => updateField('age', e.target.value)} placeholder="Age" min="0" />
+              <button type="button" className="age-stepper-btn" onClick={() => adjustAge(1)} title="Increase age">+</button>
+            </div>
           </label>
           <label className="field-box patient-log-field">
             <span className="field-label">Gender</span>
@@ -215,7 +232,25 @@ export default function PatientLogs() {
           </label>
           <label className="field-box patient-log-field">
             <span className="field-label">Treatment done</span>
-            <input type="text" className="field-input" value={form.treatmentDone} onChange={(e) => updateField('treatmentDone', e.target.value)} placeholder="Therapy / Assessment / Relaxation exercise" />
+            <input
+              type="text"
+              className="field-input"
+              value={form.treatmentDone}
+              onChange={(e) => updateField('treatmentDone', e.target.value)}
+              placeholder="Therapy / Assessment / Relaxation exercise"
+            />
+            <div className="quick-suggestion-row">
+              {treatmentOptions.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  className="quick-suggestion-chip"
+                  onClick={() => updateField('treatmentDone', option)}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
           </label>
           <label className="field-box patient-log-field">
             <span className="field-label">Cost</span>

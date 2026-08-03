@@ -134,6 +134,35 @@
    PROFILE CARD
    ======================================================================== */
 
+.patient-log-grid {
+   display: grid;
+   grid-template-columns: repeat(3, minmax(0, 1fr));
+   gap: 16px;
+   margin-bottom: 16px;
+}
+
+.patient-log-field {
+   display: flex;
+   flex-direction: column;
+   gap: 8px;
+}
+
+.patient-log-details {
+   display: grid;
+   grid-template-columns: repeat(2, minmax(0, 1fr));
+   gap: 12px;
+   padding: 0 6px 6px;
+}
+
+.patient-log-details div {
+   color: var(--text-secondary);
+   font-size: 13px;
+}
+
+.patient-log-details strong {
+   color: var(--text-primary);
+}
+
 .profile-card {
     background: #f9fafb;
     border: 1px solid #e5e7eb;
@@ -241,8 +270,16 @@
 }
 
 /* iPad / Medium Tablet (641px - 768px) */
+@media (max-width: 900px) {
+    .patient-log-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
 @media (max-width: 768px) and (min-width: 641px) {
-    .field-box-grid {
+    .field-box-grid,
+    .patient-log-grid,
+    .patient-log-details {
         grid-template-columns: 1fr;
     }
     .profile-header {

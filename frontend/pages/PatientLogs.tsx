@@ -1,9 +1,7 @@
-import { useEffect, useState } from 'react';
-import {
-  getPatientLogs,
-  savePatientLogs,
-  type PatientLogRecord,
-} from '../utils/store';
+import { useEffect, useMemo, useState } from 'react';
+import * as api from '../utils/api';
+import { type PatientLogRecord } from '../utils/store';
+import '../styles/client-profile.css';
 
 const initialFormState = {
   dateOfVisit: '',
@@ -17,16 +15,45 @@ const initialFormState = {
   cost: '',
 };
 
+interface PatientLogRow extends PatientLogRecord {
+  _id?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export default function PatientLogs() {
-  const [logs, setLogs] = useState<PatientLogRecord[]>([]);
+  const [logs, setLogs] = useState<PatientLogRow[]>([]);
   const [form, setForm] = useState(initialFormState);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const ipOpOptions = useMemo(() => {
+    return [...new Set(logs.map((log) => log.ipOp).filter(Boolean))];
+  }, [logs]);
+
+  const wardOptions = useMemo(() => {
+    return [...new Set(logs.map((log) => log.ipWard).filter(Boolean))];
+  }, [logs]);
+
+  async function loadLogs() {
+    try {
+      const data = await api.getPatientLogs();
+      const sorted = [...data].sort((a, b) => {
+        const dateA = a.dateOfVisit ? new Date(a.dateOfVisit).getTime() : 0;
+        const dateB = b.dateOfVisit ? new Date(b.dateOfVisit).getTime() : 0;
+        return dateB - dateA;
+      });
+      setLogs(sorted as PatientLogRow[]);
+    } catch (error) {
+      console.error('Failed to load patient logs', error);
+      setLogs([]);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    setLogs(getPatientLogs().sort((a, b) => {
-      const dateA = a.dateOfVisit ? new Date(a.dateOfVisit).getTime() : 0;
-      const dateB = b.dateOfVisit ? new Date(b.dateOfVisit).getTime() : 0;
-      return dateB - dateA;
-    }));
+    loadLogs();
   }, []);
 
   function updateField(key: keyof typeof initialFormState, value: string) {
@@ -35,11 +62,26 @@ export default function PatientLogs() {
 
   function resetForm() {
     setForm(initialFormState);
+    setEditingId(null);
   }
 
-  function handleSaveLog() {
-    const nextLog: PatientLogRecord = {
-      id: crypto.randomUUID(),
+  function startEdit(log: PatientLogRow) {
+    setEditingId(log._id || log.id);
+    setForm({
+      dateOfVisit: log.dateOfVisit || '',
+      ipOp: log.ipOp || '',
+      ipWard: log.ipWard || '',
+      name: log.name || '',
+      ageGender: log.ageGender || '',
+      opNumber: log.opNumber || '',
+      diagnosis: log.diagnosis || '',
+      treatmentDone: log.treatmentDone || '',
+      cost: log.cost || '',
+    });
+  }
+
+  async function handleSaveLog() {
+    const payload = {
       dateOfVisit: form.dateOfVisit,
       ipOp: form.ipOp,
       ipWard: form.ipWard,
@@ -51,20 +93,26 @@ export default function PatientLogs() {
       cost: form.cost,
     };
 
-    const persisted = [nextLog, ...getPatientLogs()];
-    savePatientLogs(persisted);
-    setLogs(persisted.sort((a, b) => {
-      const dateA = a.dateOfVisit ? new Date(a.dateOfVisit).getTime() : 0;
-      const dateB = b.dateOfVisit ? new Date(b.dateOfVisit).getTime() : 0;
-      return dateB - dateA;
-    }));
-    resetForm();
+    try {
+      if (editingId) {
+        await api.updatePatientLog(editingId, payload);
+      } else {
+        await api.createPatientLog(payload);
+      }
+      resetForm();
+      await loadLogs();
+    } catch (error) {
+      console.error('Failed to save patient log', error);
+    }
   }
 
-  function handleDeleteLog(id: string) {
-    const persisted = getPatientLogs().filter((log) => log.id !== id);
-    savePatientLogs(persisted);
-    setLogs(persisted); 
+  async function handleDeleteLog(id: string) {
+    try {
+      await api.deletePatientLog(id);
+      await loadLogs();
+    } catch (error) {
+      console.error('Failed to delete patient log', error);
+    }
   }
 
   return (
@@ -80,7 +128,7 @@ export default function PatientLogs() {
         </div>
         <div className="page-header-content">
           <h2>Patient Logs</h2>
-          <p className="page-subtitle">Save and review patient visit records in one dedicated space.</p>
+          <p className="page-subtitle">Save and review patient visit records in one secure, dedicated space.</p>
         </div>
       </div>
 
@@ -92,11 +140,31 @@ export default function PatientLogs() {
           </label>
           <label className="field-box patient-log-field">
             <span className="field-label">IP/OP</span>
-            <input type="text" className="field-input" value={form.ipOp} onChange={(e) => updateField('ipOp', e.target.value)} placeholder="IP / OP" />
+            <input
+              type="text"
+              className="field-input"
+              list="ipop-suggestions"
+              value={form.ipOp}
+              onChange={(e) => updateField('ipOp', e.target.value)}
+              placeholder="IP / OP"
+            />
+            <datalist id="ipop-suggestions">
+              {ipOpOptions.map((option) => <option key={option} value={option} />)}
+            </datalist>
           </label>
           <label className="field-box patient-log-field">
             <span className="field-label">IP Ward</span>
-            <input type="text" className="field-input" value={form.ipWard} onChange={(e) => updateField('ipWard', e.target.value)} placeholder="Ward / Room" />
+            <input
+              type="text"
+              className="field-input"
+              list="ward-suggestions"
+              value={form.ipWard}
+              onChange={(e) => updateField('ipWard', e.target.value)}
+              placeholder="Ward / Room"
+            />
+            <datalist id="ward-suggestions">
+              {wardOptions.map((option) => <option key={option} value={option} />)}
+            </datalist>
           </label>
           <label className="field-box patient-log-field">
             <span className="field-label">Name</span>
@@ -124,17 +192,22 @@ export default function PatientLogs() {
           </label>
         </div>
         <div className="save-session-row">
-          <button className="btn btn-save-session" onClick={handleSaveLog}>Save Patient Log</button>
+          <button className="btn btn-save-session" onClick={handleSaveLog}>{editingId ? 'Update Patient Log' : 'Save Patient Log'}</button>
+          {editingId && (
+            <button className="btn btn-edit" style={{ marginLeft: 12 }} onClick={resetForm}>Cancel</button>
+          )}
         </div>
       </div>
 
       <div className="profile-card">
-        {logs.length === 0 ? (
+        {loading ? (
+          <p className="empty-history">Loading patient logs…</p>
+        ) : logs.length === 0 ? (
           <p className="empty-history">No patient logs found.</p>
         ) : (
           <div className="history-list">
-            {[...logs].reverse().map((log, index) => (
-              <div key={log.id} className="history-item patient-log-item">
+            {[...logs].map((log, index) => (
+              <div key={log._id || log.id} className="history-item patient-log-item">
                 <div className="history-header">
                   <div className="history-header-left">
                     <div className="history-number">#{logs.length - index}</div>
@@ -142,11 +215,16 @@ export default function PatientLogs() {
                       <p className="history-date">{log.dateOfVisit ? new Date(log.dateOfVisit).toLocaleDateString([], { year: 'numeric', month: 'long', day: 'numeric' }) : 'Visit date not set'}</p>
                     </div>
                   </div>
-                  <button className="history-delete-btn" onClick={() => handleDeleteLog(log.id)} title="Delete patient log">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
-                    </svg>
-                  </button>
+                  <div className="profile-actions" style={{ gap: 8 }}>
+                    <button className="btn-edit" onClick={() => startEdit(log)} title="Edit patient log">
+                      Edit
+                    </button>
+                    <button className="history-delete-btn" onClick={() => handleDeleteLog(log._id || log.id || '')} title="Delete patient log">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
                 <div className="patient-log-details">
                   <div><strong>IP/OP:</strong> {log.ipOp || '—'}</div>

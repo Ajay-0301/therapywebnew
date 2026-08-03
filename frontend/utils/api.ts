@@ -161,6 +161,42 @@ export async function restoreDeletedClient(id: string) {
 }
 
 // ========================================
+// PATIENT LOGS API
+// ========================================
+
+export interface PatientLogApiRecord {
+  _id?: string;
+  id?: string;
+  dateOfVisit: string;
+  ipOp: string;
+  ipWard: string;
+  name: string;
+  ageGender: string;
+  opNumber: string;
+  diagnosis: string;
+  treatmentDone: string;
+  cost: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export async function getPatientLogs() {
+  return apiRequest<PatientLogApiRecord[]>('/patient-logs', 'GET');
+}
+
+export async function createPatientLog(patientLogData: unknown) {
+  return apiRequest<PatientLogApiRecord>('/patient-logs', 'POST', patientLogData);
+}
+
+export async function updatePatientLog(id: string, patientLogData: unknown) {
+  return apiRequest<PatientLogApiRecord>(`/patient-logs/${id}`, 'PUT', patientLogData);
+}
+
+export async function deletePatientLog(id: string) {
+  return apiRequest<{ message: string }>(`/patient-logs/${id}`, 'DELETE');
+}
+
+// ========================================
 // APPOINTMENT API
 // ========================================
 

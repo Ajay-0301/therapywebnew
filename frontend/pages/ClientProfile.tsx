@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   getSiteSettings,
   formatTimeDisplay,
@@ -69,11 +69,13 @@ interface UpdateClientPayload {
 export default function ClientProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [client, setClient] = useState<Client | null>(null);
   const [editing, setEditing] = useState(false);
   const [timeFormat, setTimeFormat] = useState<SiteSettings['timeFormat']>('12h');
   const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const patientLogsRef = useRef<HTMLDivElement | null>(null);
 
   // Editable profile fields
   const [name, setName] = useState('');
@@ -107,6 +109,7 @@ export default function ClientProfile() {
   const sessionTimer = useRef<number | null>(null);
 
   useEffect(() => {
+    const shouldJumpToPatientLogs = new URLSearchParams(location.search).get('tab') === 'patientLogs';
     const loadClient = async () => {
       try {
         if (!id) {
@@ -141,6 +144,11 @@ export default function ClientProfile() {
         setHopi(foundClient.hopi || '');
         setPatientLogName(foundClient.name || '');
         setPatientLogAgeGender(`${foundClient.age || ''} ${foundClient.gender || ''}`.trim());
+        if (shouldJumpToPatientLogs) {
+          requestAnimationFrame(() => {
+            patientLogsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
+        }
       } catch (err) {
         console.error('Failed to load client:', err);
         navigate('/clients');
@@ -180,7 +188,7 @@ export default function ClientProfile() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('site-settings-updated', handleSettingsChange);
     };
-  }, [id, navigate]);
+  }, [id, navigate, location.search]);
 
   function persist(updated: Partial<Client>) {
     if (!client) return;
@@ -568,7 +576,7 @@ export default function ClientProfile() {
       </div>
 
       {/* === Patient Logs === */}
-      <div className="profile-card">
+      <div className="profile-card" id="patient-logs-section" ref={patientLogsRef}>
         <div className="profile-card-header">
           <h3 className="section-title">Patient Logs</h3>
         </div>

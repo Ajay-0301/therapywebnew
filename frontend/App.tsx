@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import DashboardLayout from './components/DashboardLayout';
 import Dashboard from './pages/Dashboard';
 import Clients from './pages/Clients';
+import PatientLogs from './pages/PatientLogs';
 import Calendar from './pages/Calendar';
 import ClientProfile from './pages/ClientProfile';
 import Insights from './pages/Insights';
@@ -45,6 +46,7 @@ function App() {
       <Route element={<DashboardLayout />}>
         <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} />} />
         <Route path="/clients" element={<ProtectedRoute element={<Clients />} />} />
+        <Route path="/patient-logs" element={<ProtectedRoute element={<PatientLogs />} />} />
         <Route path="/calendar" element={<ProtectedRoute element={<Calendar />} />} />
         <Route path="/clients/:id" element={<ProtectedRoute element={<ClientProfile />} />} />
         <Route path="/insights" element={<ProtectedRoute element={<Insights />} />} />

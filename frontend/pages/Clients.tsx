@@ -450,6 +450,16 @@ export default function Clients() {
                 </div>
               </div>
               <button
+                className="btn-patient-logs"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/clients/${c._id}?tab=patientLogs`);
+                }}
+                title="Open patient logs"
+              >
+                Patient Logs
+              </button>
+              <button
                 className="btn-delete-client"
                 onClick={(e) => {
                   e.stopPropagation();

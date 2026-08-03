@@ -82,7 +82,7 @@ exports.getClientById = async (req, res) => {
 
 exports.createClient = async (req, res) => {
   try {
-    const { name, email, phone, age, status, diagnosis, location, avatar, clientId, gender, relationshipStatus, occupation, chiefComplaints, hopi } = req.body;
+    const { name, email, phone, age, status, diagnosis, location, avatar, clientId, gender, relationshipStatus, occupation, chiefComplaints, hopi, patientLogs } = req.body;
 
     if (!name || !clientId || (!email && !phone)) {
       return res.status(400).json({ message: 'Name, client ID, and either email or phone required' });
@@ -107,6 +107,7 @@ exports.createClient = async (req, res) => {
       avatar,
       sessions: [],
       sessionHistory: [],
+      patientLogs: Array.isArray(patientLogs) ? patientLogs : [],
     });
 
     await client.save();
@@ -118,7 +119,7 @@ exports.createClient = async (req, res) => {
 
 exports.updateClient = async (req, res) => {
   try {
-    const { name, email, phone, age, status, diagnosis, location, avatar, clientId, gender, relationshipStatus, occupation, chiefComplaints, hopi, sessionHistory, sessionCount, sessions } = req.body;
+    const { name, email, phone, age, status, diagnosis, location, avatar, clientId, gender, relationshipStatus, occupation, chiefComplaints, hopi, sessionHistory, sessionCount, sessions, patientLogs } = req.body;
 
     console.log('updateClient called with:', { 
       id: req.params.id, 
@@ -148,6 +149,7 @@ exports.updateClient = async (req, res) => {
     if (sessionHistory !== undefined) updateData.sessionHistory = sessionHistory;
     if (sessionCount !== undefined) updateData.sessionCount = sessionCount;
     if (sessions !== undefined) updateData.sessions = sessions;
+    if (patientLogs !== undefined) updateData.patientLogs = patientLogs;
     
     updateData.updatedAt = new Date();
 
@@ -252,6 +254,7 @@ exports.restoreDeletedClient = async (req, res) => {
       status: restorePayload.status || 'active',
       sessionHistory: Array.isArray(restorePayload.sessionHistory) ? restorePayload.sessionHistory : [],
       sessions: Array.isArray(restorePayload.sessions) ? restorePayload.sessions : [],
+      patientLogs: Array.isArray(restorePayload.patientLogs) ? restorePayload.patientLogs : [],
     });
 
     if (deletedClient.originalClientMongoId) {

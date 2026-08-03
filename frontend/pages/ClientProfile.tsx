@@ -17,6 +17,19 @@ interface SessionRecord {
   followUpNotes: string;
 }
 
+interface PatientLogRecord {
+  id: string;
+  dateOfVisit: string;
+  ipOp: string;
+  ipWard: string;
+  name: string;
+  ageGender: string;
+  opNumber: string;
+  diagnosis: string;
+  treatmentDone: string;
+  cost: string;
+}
+
 interface Client {
   id: string;
   _id?: string;
@@ -33,6 +46,7 @@ interface Client {
   chiefComplaints?: string;
   hopi?: string;
   sessionHistory?: SessionRecord[];
+  patientLogs?: PatientLogRecord[];
   createdAt?: string | number;
 }
 
@@ -49,6 +63,7 @@ interface UpdateClientPayload {
   chiefComplaints?: string;
   hopi?: string;
   sessionHistory?: SessionRecord[];
+  patientLogs?: PatientLogRecord[];
 }
 
 export default function ClientProfile() {
@@ -70,6 +85,17 @@ export default function ClientProfile() {
   // Clinical fields
   const [chiefComplaints, setChiefComplaints] = useState('');
   const [hopi, setHopi] = useState('');
+
+  // Patient logs form state
+  const [patientLogDate, setPatientLogDate] = useState('');
+  const [patientLogIpOp, setPatientLogIpOp] = useState('');
+  const [patientLogIpWard, setPatientLogIpWard] = useState('');
+  const [patientLogName, setPatientLogName] = useState('');
+  const [patientLogAgeGender, setPatientLogAgeGender] = useState('');
+  const [patientLogOpNumber, setPatientLogOpNumber] = useState('');
+  const [patientLogDiagnosis, setPatientLogDiagnosis] = useState('');
+  const [patientLogTreatmentDone, setPatientLogTreatmentDone] = useState('');
+  const [patientLogCost, setPatientLogCost] = useState('');
 
   // Current session
   const [sessionNotes, setSessionNotes] = useState('');
@@ -113,6 +139,8 @@ export default function ClientProfile() {
         setSessionCount(foundClient.sessionCount || 0);
         setChiefComplaints(foundClient.chiefComplaints || '');
         setHopi(foundClient.hopi || '');
+        setPatientLogName(foundClient.name || '');
+        setPatientLogAgeGender(`${foundClient.age || ''} ${foundClient.gender || ''}`.trim());
       } catch (err) {
         console.error('Failed to load client:', err);
         navigate('/clients');
@@ -191,6 +219,42 @@ export default function ClientProfile() {
 
   function handleSaveHopi() {
     persist({ hopi });
+  }
+
+  function handleSavePatientLog() {
+    if (!client) return;
+
+    const record: PatientLogRecord = {
+      id: crypto.randomUUID(),
+      dateOfVisit: patientLogDate,
+      ipOp: patientLogIpOp,
+      ipWard: patientLogIpWard,
+      name: patientLogName || client.name,
+      ageGender: patientLogAgeGender,
+      opNumber: patientLogOpNumber,
+      diagnosis: patientLogDiagnosis,
+      treatmentDone: patientLogTreatmentDone,
+      cost: patientLogCost,
+    };
+
+    const history = [...(client.patientLogs || []), record];
+    persist({ patientLogs: history });
+
+    setPatientLogDate('');
+    setPatientLogIpOp('');
+    setPatientLogIpWard('');
+    setPatientLogName(client.name || '');
+    setPatientLogAgeGender(`${client.age || ''} ${client.gender || ''}`.trim());
+    setPatientLogOpNumber('');
+    setPatientLogDiagnosis('');
+    setPatientLogTreatmentDone('');
+    setPatientLogCost('');
+  }
+
+  function deletePatientLogRecord(recordId: string) {
+    if (!client) return;
+    const history = (client.patientLogs || []).filter((log: PatientLogRecord) => log.id !== recordId);
+    persist({ patientLogs: history });
   }
 
   function handleSaveSession() {
@@ -501,6 +565,88 @@ export default function ClientProfile() {
           onBlur={() => persist({ hopi })}
           rows={6}
         />
+      </div>
+
+      {/* === Patient Logs === */}
+      <div className="profile-card">
+        <div className="profile-card-header">
+          <h3 className="section-title">Patient Logs</h3>
+        </div>
+        <div className="patient-log-grid">
+          <label className="field-box patient-log-field">
+            <span className="field-label">Date of visit</span>
+            <input type="date" className="field-input" value={patientLogDate} onChange={(e) => setPatientLogDate(e.target.value)} />
+          </label>
+          <label className="field-box patient-log-field">
+            <span className="field-label">IP/OP</span>
+            <input type="text" className="field-input" value={patientLogIpOp} onChange={(e) => setPatientLogIpOp(e.target.value)} placeholder="IP / OP" />
+          </label>
+          <label className="field-box patient-log-field">
+            <span className="field-label">IP Ward</span>
+            <input type="text" className="field-input" value={patientLogIpWard} onChange={(e) => setPatientLogIpWard(e.target.value)} placeholder="Ward / Room" />
+          </label>
+          <label className="field-box patient-log-field">
+            <span className="field-label">Name</span>
+            <input type="text" className="field-input" value={patientLogName} onChange={(e) => setPatientLogName(e.target.value)} placeholder="Patient name" />
+          </label>
+          <label className="field-box patient-log-field">
+            <span className="field-label">Age and gender</span>
+            <input type="text" className="field-input" value={patientLogAgeGender} onChange={(e) => setPatientLogAgeGender(e.target.value)} placeholder="Age / Gender" />
+          </label>
+          <label className="field-box patient-log-field">
+            <span className="field-label">OP Number</span>
+            <input type="text" className="field-input" value={patientLogOpNumber} onChange={(e) => setPatientLogOpNumber(e.target.value)} placeholder="OP Number" />
+          </label>
+          <label className="field-box patient-log-field">
+            <span className="field-label">Diagnosis</span>
+            <input type="text" className="field-input" value={patientLogDiagnosis} onChange={(e) => setPatientLogDiagnosis(e.target.value)} placeholder="Diagnosis" />
+          </label>
+          <label className="field-box patient-log-field">
+            <span className="field-label">Treatment done</span>
+            <input type="text" className="field-input" value={patientLogTreatmentDone} onChange={(e) => setPatientLogTreatmentDone(e.target.value)} placeholder="Therapy / Assessment / Relaxation exercise" />
+          </label>
+          <label className="field-box patient-log-field">
+            <span className="field-label">Cost</span>
+            <input type="text" className="field-input" value={patientLogCost} onChange={(e) => setPatientLogCost(e.target.value)} placeholder="Cost" />
+          </label>
+        </div>
+        <div className="save-session-row">
+          <button className="btn btn-save-session" onClick={handleSavePatientLog}>Save Patient Log</button>
+        </div>
+
+        {(!client.patientLogs || client.patientLogs.length === 0) ? (
+          <p className="empty-history">No patient logs recorded yet.</p>
+        ) : (
+          <div className="history-list">
+            {[...(client.patientLogs || [])].reverse().map((log, index) => (
+              <div key={log.id} className="history-item patient-log-item">
+                <div className="history-header">
+                  <div className="history-header-left">
+                    <div className="history-number">#{(client.patientLogs?.length || 0) - index}</div>
+                    <div className="history-date-group">
+                      <p className="history-date">{log.dateOfVisit ? new Date(log.dateOfVisit).toLocaleDateString([], { year: 'numeric', month: 'long', day: 'numeric' }) : 'Visit date not set'}</p>
+                    </div>
+                  </div>
+                  <button className="history-delete-btn" onClick={() => deletePatientLogRecord(log.id)} title="Delete patient log">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                    </svg>
+                  </button>
+                </div>
+                <div className="patient-log-details">
+                  <div><strong>IP/OP:</strong> {log.ipOp || '—'}</div>
+                  <div><strong>IP Ward:</strong> {log.ipWard || '—'}</div>
+                  <div><strong>Name:</strong> {log.name || '—'}</div>
+                  <div><strong>Age/Gender:</strong> {log.ageGender || '—'}</div>
+                  <div><strong>OP Number:</strong> {log.opNumber || '—'}</div>
+                  <div><strong>Diagnosis:</strong> {log.diagnosis || '—'}</div>
+                  <div><strong>Treatment:</strong> {log.treatmentDone || '—'}</div>
+                  <div><strong>Cost:</strong> {log.cost || '—'}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* === Session Notes === */}

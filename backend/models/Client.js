@@ -10,6 +10,19 @@ const SessionSchema = new mongoose.Schema({
   followUpNotes: String,
 });
 
+const PatientLogSchema = new mongoose.Schema({
+  id: String,
+  dateOfVisit: String,
+  ipOp: String,
+  ipWard: String,
+  name: String,
+  ageGender: String,
+  opNumber: String,
+  diagnosis: String,
+  treatmentDone: String,
+  cost: String,
+});
+
 const ClientSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -55,6 +68,7 @@ const ClientSchema = new mongoose.Schema({
   },
   sessions: [SessionSchema],
   sessionHistory: [SessionSchema],
+  patientLogs: [PatientLogSchema],
   createdAt: {
     type: Date,
     default: Date.now,

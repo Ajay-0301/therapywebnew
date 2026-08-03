@@ -7,6 +7,19 @@ export interface SessionRecord {
     followUpNotes: string;
 }
 
+export interface PatientLogRecord {
+    id: string;
+    dateOfVisit: string;
+    ipOp: string;
+    ipWard: string;
+    name: string;
+    ageGender: string;
+    opNumber: string;
+    diagnosis: string;
+    treatmentDone: string;
+    cost: string;
+}
+
 export interface Client {
     _id: string;
     id?: string;
@@ -23,6 +36,7 @@ export interface Client {
     chiefComplaints: string;
     hopi: string;
     sessionHistory: SessionRecord[];
+    patientLogs?: PatientLogRecord[];
     createdAt?: number | string;
 }
 

@@ -168,6 +168,14 @@ export function saveClients(clients: Client[]): void {
     safeSetItem('therapyClients', JSON.stringify(clients));
 }
 
+export function getPatientLogs(): PatientLogRecord[] {
+    return safeParse<PatientLogRecord[]>(safeGetItem('therapyPatientLogs'), [], 'therapyPatientLogs');
+}
+
+export function savePatientLogs(logs: PatientLogRecord[]): void {
+    safeSetItem('therapyPatientLogs', JSON.stringify(logs));
+}
+
 export function getDeletedClients(): DeletedClient[] {
     return safeParse<DeletedClient[]>(safeGetItem('therapyDeletedClients'), [], 'therapyDeletedClients');
 }

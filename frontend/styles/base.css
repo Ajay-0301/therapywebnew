@@ -21,12 +21,12 @@
     --danger: #ef4444;
 
     --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --text-tertiary: #94a3b8;
-    --text-light: #cbd5e1;
+    --text-secondary: #1e293b;
+    --text-tertiary: #334155;
+    --text-light: #475569;
 
-    --border: #e2e8f0;
-    --border-dark: #cbd5e1;
+    --border: #cbd5e1;
+    --border-dark: #94a3b8;
 
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
     --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -41,6 +41,88 @@
 
     --content-padding: 48px;
     --page-header-padding: 36px;
+}
+
+/* Global Light Mode High Contrast & Darker Text Styles */
+body:not(.dark-mode) {
+    color: #0f172a;
+}
+
+body:not(.dark-mode) h1,
+body:not(.dark-mode) h2,
+body:not(.dark-mode) h3,
+body:not(.dark-mode) h4,
+body:not(.dark-mode) h5,
+body:not(.dark-mode) h6 {
+    color: #0f172a;
+}
+
+body:not(.dark-mode) p,
+body:not(.dark-mode) span,
+body:not(.dark-mode) div,
+body:not(.dark-mode) td,
+body:not(.dark-mode) th,
+body:not(.dark-mode) li {
+    color: #1e293b;
+}
+
+body:not(.dark-mode) label,
+body:not(.dark-mode) .field-label,
+body:not(.dark-mode) .form-label,
+body:not(.dark-mode) .counter-label,
+body:not(.dark-mode) .time-input-group label,
+body:not(.dark-mode) .profile-id-label {
+    color: #0f172a !important;
+    font-weight: 700 !important;
+}
+
+body:not(.dark-mode) input,
+body:not(.dark-mode) select,
+body:not(.dark-mode) textarea {
+    color: #0f172a !important;
+    font-weight: 600 !important;
+    background-color: #ffffff;
+    border-color: #cbd5e1;
+}
+
+body:not(.dark-mode) input::placeholder,
+body:not(.dark-mode) textarea::placeholder,
+body:not(.dark-mode) select::placeholder,
+body:not(.dark-mode) ::placeholder {
+    color: #334155 !important;
+    opacity: 0.95 !important;
+    font-weight: 500 !important;
+}
+
+body:not(.dark-mode) .text-muted,
+body:not(.dark-mode) .text-tertiary,
+body:not(.dark-mode) small,
+body:not(.dark-mode) .page-subtitle,
+body:not(.dark-mode) .sessions-hint,
+body:not(.dark-mode) .history-date-sub,
+body:not(.dark-mode) .box-count,
+body:not(.dark-mode) .box-item-time,
+body:not(.dark-mode) .box-item-detail-secondary {
+    color: #334155 !important;
+}
+
+body:not(.dark-mode) .tag,
+body:not(.dark-mode) .chip,
+body:not(.dark-mode) .pill,
+body:not(.dark-mode) .badge,
+body:not(.dark-mode) .btn-tag,
+body:not(.dark-mode) .treatment-tag,
+body:not(.dark-mode) .treatment-option,
+body:not(.dark-mode) .quick-select-item {
+    color: #1e293b !important;
+    font-weight: 700 !important;
+    border-color: #94a3b8 !important;
+    background: rgba(226, 232, 240, 0.8) !important;
+}
+
+body:not(.dark-mode) .section-title {
+    color: #0f172a !important;
+    font-weight: 800 !important;
 }
 
 /* Dark theme */
